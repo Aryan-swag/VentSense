@@ -1,0 +1,7 @@
+# KiCad local state and backups
+*.lck
+*-backups/
+*.kicad_prl
+fp-info-cache
+*.bak
+~*

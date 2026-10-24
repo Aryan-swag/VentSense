@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "VentSense_Modules")(type "KiCad")(uri "${KIPRJMOD}/VentSense_Modules.kicad_sym")(options "")(descr "VentSense module header symbols (Rev 2.1)"))
+)

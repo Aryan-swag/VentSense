@@ -1,0 +1,236 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "e587cf2d-dcdc-467f-9bf7-11a8151c0250")
+	(paper "A4")
+	(title_block
+		(title "VentSense - Stage 2 schematic (root)")
+		(date "2026-10-20")
+		(rev "2.1")
+		(company "Team VentSense, IIT (BHU) Varanasi")
+		(comment 1 "VK26-IITH-SE-0279 | Vishwakarma Awards 2026-27 | Stage 2")
+		(comment 2 "Spec: CLAUDE.md section 5 + BOM Rev 2.1 (bom/VentSense_BOM_Rev2.1.xlsx)")
+		(comment 3 "Hierarchy: Power, Pack path, Measurement, MCU and I/O")
+	)
+	(lib_symbols)
+	(text "VentSense - 4S Li-ion early-warning and per-cell isolation rig"
+		(exclude_from_sim no)
+		(at 15.24 25.4 0)
+		(effects
+			(font
+				(size 2.5 2.5)
+				(bold yes)
+			)
+			(justify left bottom)
+		)
+		(uuid "665b022e-f92f-45f9-a2f7-373354b732f4")
+	)
+	(text_box "DESIGN RULES (Rev 2.1, see CLAUDE.md and notes/decisions.md)\n* Fail-secure: every relay energised = connected. Relay GPIOs float at reset, so relays stay off during boot.\n* One star ground: pack negative (NODE0) + logic GND + 12 V return. Heater/load returns straight to the star.\n* Global nets: +12V_IN, +12V, +5V, +3V3, GND, SDA, SCL, ONEWIRE, CELL1_P-CELL4_P, RLY_SEG1-4, RLY_PACK, HTR_EN, LOAD_EN, LOAD_RTN.\n* Local nets: NODE0-NODE4 (Pack path), VSENS1-4, GAS1_CO-GAS4_CO, GAS1_H2-GAS4_H2 (Measurement), SPI/buzzer/buttons (MCU).\n* Modules are header symbols from VentSense_Modules.kicad_sym; verify each module pin order on arrival.\n* E-stop S1 is ONE 2-unit part: unit A on Pack path (pack output), unit B on Power (heater line)."
+		(exclude_from_sim no)
+		(at 15.24 88.9 0)
+		(size 260 34)
+		(margins 1.5 1.5 1.5 1.5)
+		(stroke
+			(width 0.2)
+			(type dash)
+		)
+		(fill
+			(type color)
+			(color 255 255 225 1)
+		)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left top)
+		)
+		(uuid "85f43285-4425-4aeb-9b3b-cced37a3efd9")
+	)
+	(sheet
+		(at 20.32 45.72)
+		(size 50.8 30.48)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "4b23f6e2-e304-4684-9c04-cb8925721087")
+		(property "Sheetname" "Power"
+			(at 20.32 44.97 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "Power.kicad_sch"
+			(at 20.32 76.8 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "VentSense_Stage2"
+				(path "/e587cf2d-dcdc-467f-9bf7-11a8151c0250"
+					(page "2")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 152.4 45.72)
+		(size 50.8 30.48)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "7acab879-7276-43dd-b3af-6155cafc5c77")
+		(property "Sheetname" "Measurement"
+			(at 152.4 44.97 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "Measurement.kicad_sch"
+			(at 152.4 76.8 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "VentSense_Stage2"
+				(path "/e587cf2d-dcdc-467f-9bf7-11a8151c0250"
+					(page "4")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 218.44 45.72)
+		(size 50.8 30.48)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "7d744d6f-d27c-423f-8e44-1c599687c3e5")
+		(property "Sheetname" "MCU_IO"
+			(at 218.44 44.97 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "MCU_IO.kicad_sch"
+			(at 218.44 76.8 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "VentSense_Stage2"
+				(path "/e587cf2d-dcdc-467f-9bf7-11a8151c0250"
+					(page "5")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 86.36 45.72)
+		(size 50.8 30.48)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "b7bb9f5f-34df-423d-98be-1bb0477659eb")
+		(property "Sheetname" "Pack_Path"
+			(at 86.36 44.97 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "Pack_Path.kicad_sch"
+			(at 86.36 76.8 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "VentSense_Stage2"
+				(path "/e587cf2d-dcdc-467f-9bf7-11a8151c0250"
+					(page "3")
+				)
+			)
+		)
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+	(embedded_fonts no)
+)
