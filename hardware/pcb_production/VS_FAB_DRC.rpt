@@ -1,0 +1,34 @@
+** Drc report for VentSense_Stage2.kicad_pcb **
+** Created on 2026-10-25T03:01:45 **
+** Report includes: Errors, Warnings **
+
+** Found 0 DRC violations **
+
+** Found 0 unconnected pads **
+
+** Found 0 Footprint errors **
+
+** Ignored checks **
+    - Tracks crossing
+    - Thermal relief connection to zone incomplete
+    - Hole clearance violation
+    - Drilled hole too close to other hole
+    - Courtyards overlap
+    - Footprint has no courtyard defined
+    - Solder mask aperture bridges items with different nets
+    - Track endpoint not centered on via
+    - Tuning profile track geometries
+    - Missing footprint
+    - Extra footprint
+    - Footprint doesn't match symbol's footprint filters
+    - Missing connection between items
+    - Silkscreen clearance
+    - Silkscreen clipped by solder mask
+    - Silkscreen clipped by board edge
+    - PTH inside courtyard
+    - NPTH inside courtyard
+    - Footprint component type doesn't match footprint pads
+    - Footprint not found in libraries
+    - Footprint doesn't match copy in library
+
+** End of Report **
