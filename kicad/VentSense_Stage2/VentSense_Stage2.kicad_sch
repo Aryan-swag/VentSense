@@ -10,7 +10,7 @@
 		(rev "2.1")
 		(company "Team VentSense, IIT (BHU) Varanasi")
 		(comment 1 "VK26-IITH-SE-0279 | Vishwakarma Awards 2026-27 | Stage 2")
-		(comment 2 "Spec: CLAUDE.md section 5 + BOM Rev 2.1 (bom/VentSense_BOM_Rev2.1.xlsx)")
+		(comment 2 "Bill of materials: bom/VentSense_BOM_Rev2.1.xlsx (Rev 2.1)")
 		(comment 3 "Hierarchy: Power, Pack path, Measurement, MCU and I/O")
 	)
 	(lib_symbols)
@@ -25,27 +25,6 @@
 			(justify left bottom)
 		)
 		(uuid "665b022e-f92f-45f9-a2f7-373354b732f4")
-	)
-	(text_box "DESIGN RULES (Rev 2.1, see CLAUDE.md and notes/decisions.md)\n* Fail-secure: every relay energised = connected. Relay GPIOs float at reset, so relays stay off during boot.\n* One star ground: pack negative (NODE0) + logic GND + 12 V return. Heater/load returns straight to the star.\n* Global nets: +12V_IN, +12V, +5V, +3V3, GND, SDA, SCL, ONEWIRE, CELL1_P-CELL4_P, RLY_SEG1-4, RLY_PACK, HTR_EN, LOAD_EN, LOAD_RTN.\n* Local nets: NODE0-NODE4 (Pack path), VSENS1-4, GAS1_CO-GAS4_CO, GAS1_H2-GAS4_H2 (Measurement), SPI/buzzer/buttons (MCU).\n* Modules are header symbols from VentSense_Modules.kicad_sym; verify each module pin order on arrival.\n* E-stop S1 is ONE 2-unit part: unit A on Pack path (pack output), unit B on Power (heater line)."
-		(exclude_from_sim no)
-		(at 15.24 88.9 0)
-		(size 260 34)
-		(margins 1.5 1.5 1.5 1.5)
-		(stroke
-			(width 0.2)
-			(type dash)
-		)
-		(fill
-			(type color)
-			(color 255 255 225 1)
-		)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left top)
-		)
-		(uuid "85f43285-4425-4aeb-9b3b-cced37a3efd9")
 	)
 	(sheet
 		(at 20.32 45.72)

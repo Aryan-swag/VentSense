@@ -10,8 +10,8 @@
 		(rev "2.1")
 		(company "Team VentSense, IIT (BHU) Varanasi")
 		(comment 1 "VK26-IITH-SE-0279 | Vishwakarma Awards 2026-27 | Stage 2")
-		(comment 2 "Spec: CLAUDE.md section 5 + BOM Rev 2.1 (bom/VentSense_BOM_Rev2.1.xlsx)")
-		(comment 3 "Sheet contents and values: see the notes box (Rev 2.1)")
+		(comment 2 "Bill of materials: bom/VentSense_BOM_Rev2.1.xlsx (Rev 2.1)")
+		(comment 3 "Part of the hierarchical schematic; see the root sheet")
 	)
 	(lib_symbols
 		(symbol "Device:C"
