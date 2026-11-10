@@ -1,0 +1,63 @@
+Item,Qty,References,Value,Footprint,Fit
+1,1,BZ1,5V active buzzer,Buzzer_Beeper:Buzzer_12x9.5RM7.6,fit
+2,1,C3,1uF,Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P2.50mm,fit
+3,1,C4,0.1uF,Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P2.50mm,fit
+4,5,C7 C8 C9 C10 C12,100nF,Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P2.50mm,fit
+5,1,C11,100uF,Capacitor_THT:CP_Radial_D6.3mm_P2.50mm,fit
+6,1,D2,Seg 1 Red,LED_THT:LED_D3.0mm,fit
+7,1,D3,Seg 1 Yellow,LED_THT:LED_D3.0mm,fit
+8,1,D4,Seg 1 Green,LED_THT:LED_D3.0mm,fit
+9,1,D5,Seg 2 Yellow,LED_THT:LED_D3.0mm,fit
+10,1,D6,Seg 2 Red,LED_THT:LED_D3.0mm,fit
+11,1,D7,Seg 2 Green,LED_THT:LED_D3.0mm,fit
+12,1,D8,Seg 3 Red,LED_THT:LED_D3.0mm,fit
+13,1,D9,Seg 3 Yellow,LED_THT:LED_D3.0mm,fit
+14,1,D10,Seg 3 Green,LED_THT:LED_D3.0mm,fit
+15,1,D11,Seg 4 Red,LED_THT:LED_D3.0mm,fit
+16,1,D12,Seg 4 Yellow,LED_THT:LED_D3.0mm,fit
+17,1,D13,Seg 4 Green,LED_THT:LED_D3.0mm,fit
+18,1,J3,J_5V_IN (from XL4015),"TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal",fit
+19,1,J4,J_12V_IN (protected +12V),"TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal",fit
+20,1,J5,J_CELL (cell + taps),"TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-6-5.08_1x06_P5.08mm_Horizontal",fit
+21,1,J6,J_RLY_SEG (4-ch relay module),Connector_PinHeader_2.54mm:PinHeader_1x08_P2.54mm_Vertical,fit
+22,1,J7,J_RLY_PACK (1-ch relay module),Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical,fit
+23,1,J8,J_GATE (to off-board IRLZ44N),"TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-4-5.08_1x04_P5.08mm_Horizontal",fit
+24,1,J9,J_I2C_EXT (INA219),Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical,fit
+25,1,Q4,BC547,Package_TO_SOT_THT:TO-92_Inline,fit
+26,4,R2 R3 R6 R7,100k,Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal,fit
+27,2,R4 R5,10,Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal,fit
+28,4,R9 R12 R14 R16,100k 1%,Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal,fit
+29,4,R10 R11 R13 R15,20k 1%,Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal,fit
+30,8,R17 R19 R21 R23 R25 R27 R29 R31,15k,Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal,fit
+31,8,R18 R20 R22 R24 R26 R28 R30 R32,22k,Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal,fit
+32,1,R33,4.7 kΩ,Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal,fit
+33,2,R34 R35,4.7k,Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal,DNP
+34,12,R36 R37 R38 R39 R40 R41 R42 R43 R44 R45 R46 R47,330,Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal,fit
+35,1,R48,1k,Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal,fit
+36,2,R49 R50,10k,Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal,fit
+37,1,SW1,Acknowledge,VentSense_Footprints:SW_Push_6mm_THT,fit
+38,1,SW2,Reset,VentSense_Footprints:SW_Push_6mm_THT,fit
+39,1,U1,TC4427 (DIP-8),Package_DIP:DIP-8_W7.62mm,fit
+40,1,U4,ADS1115 #1 0x48 (CO),Connector_PinSocket_2.54mm:PinSocket_1x10_P2.54mm_Vertical,fit
+41,1,U5,ADS1115 #2 0x49 (H2),Connector_PinSocket_2.54mm:PinSocket_1x10_P2.54mm_Vertical,fit
+42,1,U6,ADS1115 #3 0x4B (cells),Connector_PinSocket_2.54mm:PinSocket_1x10_P2.54mm_Vertical,fit
+43,1,U7,MQ-7 seg 1,Connector_JST:JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical,fit
+44,1,U8,MQ-7 seg 2,Connector_JST:JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical,fit
+45,1,U9,MQ-7 seg 3,Connector_JST:JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical,fit
+46,1,U10,MQ-7 seg 4,Connector_JST:JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical,fit
+47,1,U11,MQ-8 seg 1,Connector_JST:JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical,fit
+48,1,U12,MQ-8 seg 2,Connector_JST:JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical,fit
+49,1,U13,MQ-8 seg 3,Connector_JST:JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical,fit
+50,1,U14,MQ-8 seg 4,Connector_JST:JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical,fit
+51,1,U15,DS18B20 cell 1,Connector_JST:JST_XH_B3B-XH-A_1x03_P2.50mm_Vertical,fit
+52,1,U16,DS18B20 cell 2,Connector_JST:JST_XH_B3B-XH-A_1x03_P2.50mm_Vertical,fit
+53,1,U17,DS18B20 cell 3,Connector_JST:JST_XH_B3B-XH-A_1x03_P2.50mm_Vertical,fit
+54,1,U18,DS18B20 cell 4,Connector_JST:JST_XH_B3B-XH-A_1x03_P2.50mm_Vertical,fit
+55,1,U19,ESP32-DevKitC-32E,VentSense_Footprints:ESP32-DevKitC-32E_2x19_P2.54mm_W25.4mm,fit
+56,1,U20,OLED 0x3C,Connector_PinSocket_2.54mm:PinSocket_1x04_P2.54mm_Vertical,fit
+57,1,U21,DS3231 RTC 0x68,Connector_PinSocket_2.54mm:PinSocket_1x06_P2.54mm_Vertical,fit
+58,1,U22,BME280 0x76,Connector_PinSocket_2.54mm:PinSocket_1x04_P2.54mm_Vertical,fit
+59,1,U23,PCF8574 #1 0x20,Connector_PinSocket_2.54mm:PinSocket_1x13_P2.54mm_Vertical,fit
+60,1,U24,PCF8574 #2 0x21,Connector_PinSocket_2.54mm:PinSocket_1x13_P2.54mm_Vertical,fit
+61,1,U25,microSD,Connector_PinSocket_2.54mm:PinSocket_1x06_P2.54mm_Vertical,fit
+62,1,U26,MAX6675,Connector_PinSocket_2.54mm:PinSocket_1x05_P2.54mm_Vertical,fit
