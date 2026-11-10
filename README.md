@@ -12,12 +12,12 @@ Our claim is narrow: **2-of-3 voting across dissimilar signals plus per-cell iso
 | What | Status | Path |
 | :--- | :--- | :--- |
 | KiCad 10 project (6 hierarchical sheets, 134 symbols) | ERC: 0 errors, 0 warnings (default checks) | [`kicad/VentSense_Stage2/`](kicad/VentSense_Stage2/) |
-| **Controller carrier PCB v1.1 (for fabrication)** | DRC: 0 violations, 0 unconnected, 0 parity issues (default checks, `--schematic-parity`) | [`hardware/pcb_production/v1.1/`](hardware/pcb_production/v1.1/) |
-| Gerber + Excellon package v1.1 | 2 layers, 124 × 126 mm | [`VentSense_Carrier_Gerbers_v1.1.zip`](hardware/pcb_production/v1.1/VentSense_Carrier_Gerbers_v1.1.zip) |
+| **Controller carrier PCB v1.1 (for fabrication)** | DRC: 0 violations, 0 unconnected, 0 parity issues (default checks, `--schematic-parity`) | [`PCB/`](PCB/) (ordering guide: [`PCB/ORDERING.md`](PCB/ORDERING.md)) |
+| Gerber + Excellon package v1.1 | 2 layers, 124 × 126 mm | [`PCB/fabrication/VentSense_Carrier_Gerbers_v1.1.zip`](PCB/fabrication/VentSense_Carrier_Gerbers_v1.1.zip) |
 | Stage 2 exports (schematic PDF/PNG, ERC/DRC, BOM CSV) | as submitted at Stage 2 (Oct 2026) | [`exports/`](exports/) |
 | Bill of materials | Rev 2.1 Final | [`bom/`](bom/) |
 | Mechanical CAD (SolidWorks) and wax thermal study | | [`ventsense_cad/`](ventsense_cad/) |
-| Superseded v1.0 PCB outputs | archived, do not order | [`hardware/pcb_production/archive_v1.0/`](hardware/pcb_production/archive_v1.0/) |
+| Superseded v1.0 PCB outputs | archived, do not order | [`PCB/archive_v1.0/`](PCB/archive_v1.0/) |
 
 ## Schematic sheets
 
@@ -38,9 +38,4 @@ Our claim is narrow: **2-of-3 voting across dissimilar signals plus per-cell iso
 - **JP1 (relay module VCC):** 1-2 = `+5V` (default), 2-3 = `+3V3`.
 - **JP2 (MAX6675 SO):** 1-2 = shared SPI MISO (IO19, default), 2-3 = IO36. This is the fallback if the microSD module doesn't release MISO.
 
-Files in `v1.1/`:
-- Gerber zip and unpacked `gerbers/`;
-- ERC and DRC reports;
-- schematic PDF;
-- board BOM (`VS_Carrier_BOM_v1.1.csv`) and the full schematic BOM (`VS_BOM_v1.1_all.csv`);
-- 3D renders (top, isometric, bottom).
+All PCB files (Gerbers, drill files, BOM, reports, renders) and the ordering note are in [`PCB/`](PCB/).
