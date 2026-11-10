@@ -1,28 +1,46 @@
-# VentSense — Multimodal Early Vent-Gas & Thermal Runaway Isolation System
-**Vishwakarma Awards 2026-27 | Stage 2: Design Specification Repository**  
-**Application Unique ID:** `VK26-IITH-SE-0279`
+# VentSense — Multimodal Early Vent-Gas & Thermal-Runaway Cell Isolation
 
----
+**Vishwakarma Awards 2026-27** · Sustainable Energy track (mentor: IIT Hyderabad) · Application ID `VK26-IITH-SE-0279`
+Team VentSense, IIT (BHU) Varanasi
 
-## 1. Executive Summary & Core Innovation
-**VentSense** is a multimodal battery safety and per-cell fault-isolation system for 4S1P INR18650-25R lithium-ion packs. It correlates early electrolyte vent-gas signatures (CO via MQ-7, H2 via MQ-8), per-cell wall temperature (DS18B20 1-Wire array), and calibrated cell voltages (ADS1115 16-bit I2C ADCs, 0.75 mV resolution) within a 60-120 s sliding voting window. Upon confirming a dual-modality fault, the ESP32 controller de-energizes a dedicated fail-secure SPDT relay in < 1.0 s.
+VentSense is a low-cost safety add-on for small Li-ion packs. Every cell segment is watched by three dissimilar signals: vent gas (MQ-7 for CO, MQ-8 for H2), cell-wall temperature (DS18B20) and voltage sag relative to the neighbouring cells (ADS1115). An ESP32 runs 2-of-3 voting. When two signal types trip on the same cell within a 60–120 s window, that cell's fail-secure SPDT bypass relay drops and the other cells keep powering the load. If two or more cells trip, the pack relay opens.
 
-## 2. Stage 2 Audit Quick-Links (For Jury Verification)
+Our claim is narrow: **2-of-3 voting across dissimilar signals plus per-cell isolation, as a low-cost retrofit for small packs.** Gas-based and voltage-based battery monitoring both exist already as prior art.
 
-| Deliverable / Artifact | Verification Metric / Status | Repository Path |
+## Repository map
+
+| What | Status | Path |
 | :--- | :--- | :--- |
-| **Native KiCad 10 Schematics (5 Sheets)** | 123 symbols, 100% footprint-mapped | [`kicad/VentSense_Stage2/`](kicad/VentSense_Stage2/) |
-| **Electrical Rules Check (ERC) Log** | **0 Errors, 0 Warnings** | [`exports/VS_ERC.rpt`](exports/VS_ERC.rpt) |
-| **Full Schematic PDF & PNG Renders** | High-res PDF and per-sheet PNGs | [`exports/VS_schematic.pdf`](exports/VS_schematic.pdf) |
-| **2-Layer Controller Carrier PCB Layout** | 124 x 112 mm FR4 carrier (93 on-board parts) | [`kicad/VentSense_Stage2/VentSense_Stage2.kicad_pcb`](kicad/VentSense_Stage2/VentSense_Stage2.kicad_pcb) |
-| **Design Rules Check (DRC) Log** | **0 DRC Violations, 0 Unconnected Pads** | [`exports/VS_DRC.rpt`](exports/VS_DRC.rpt) |
-| **Auto-Routed Production PCB & Gerbers** | **899 routed copper segments, 20 vias** | [`hardware/pcb_production/VentSense_Carrier_Gerbers_v1.0.zip`](hardware/pcb_production/VentSense_Carrier_Gerbers_v1.0.zip) |
-| **Unpacked Gerber & Drill Layers** | RS-274X Gerbers + Excellon PTH/NPTH drills | [`hardware/pcb_production/gerbers/`](hardware/pcb_production/gerbers/) |
-| **Itemized Bill of Materials (BOM)** | 73 Core lines + 25 Spares (100% domestic) | [`bom/`](bom/) |
+| KiCad 10 project (6 hierarchical sheets, 134 symbols) | ERC: 0 errors, 0 warnings (default checks) | [`kicad/VentSense_Stage2/`](kicad/VentSense_Stage2/) |
+| **Controller carrier PCB v1.1 (for fabrication)** | DRC: 0 violations, 0 unconnected, 0 parity issues (default checks, `--schematic-parity`) | [`hardware/pcb_production/v1.1/`](hardware/pcb_production/v1.1/) |
+| Gerber + Excellon package v1.1 | 2 layers, 124 × 126 mm | [`VentSense_Carrier_Gerbers_v1.1.zip`](hardware/pcb_production/v1.1/VentSense_Carrier_Gerbers_v1.1.zip) |
+| Stage 2 exports (schematic PDF/PNG, ERC/DRC, BOM CSV) | as submitted at Stage 2 (Oct 2026) | [`exports/`](exports/) |
+| Bill of materials | Rev 2.1 Final | [`bom/`](bom/) |
+| Mechanical CAD (SolidWorks) and wax thermal study | | [`ventsense_cad/`](ventsense_cad/) |
+| Superseded v1.0 PCB outputs | archived, do not order | [`hardware/pcb_production/archive_v1.0/`](hardware/pcb_production/archive_v1.0/) |
 
-## 3. Five-Sheet Hierarchical Architecture
-- **Sheet 1 (`VentSense_Stage2.kicad_sch`):** Top-level interconnect for power rails (+12V, +5V, +3V3, GND), I2C, SPI, 1-Wire, and relay control.
-- **Sheet 2 (`Power_Protection.kicad_sch`):** 12V 5A input, IRF4905 reverse-polarity protection, 5A/3A fuses, 2-NC E-Stop, XL4015 5A buck, TC4427 gate driver, IRLZ44N switches, and KSD301 thermal cutoff.
-- **Sheet 3 (`Battery_Switching.kicad_sch`):** 4S1P INR18650-25R string, 4x SPDT fail-secure bypass relays, pack disconnect relay, Bourns MF-R250 PTCs, and 100k/20k 1% dividers.
-- **Sheet 4 (`Sensing_Array.kicad_sch`):** 3x ADS1115 16-bit ADCs (0x48, 0x49, 0x4B), INA219 current monitor (0x40), 4x DS18B20 probes, BME280 (0x76), and MAX6675 thermocouple verifier.
-- **Sheet 5 (`MCU_And_UI.kicad_sch`):** ESP32-DevKitC-32E, DS3231 RTC (0x68), SSD1306 OLED (0x3C), 2x PCF8574 LED expanders (0x20, 0x21), BC547 buzzer driver, and microSD SPI logger.
+## Schematic sheets
+
+1. **Power:** 12 V input, IRF4905 reverse-polarity protection, heater branch (5 A fuse, E-stop NC2, KSD301 70 °C cutoff), TC4427 gate driver, IRLZ44N switches.
+2. **Pack_Path:** 4S INR18650-25R string, 4 SPDT bypass relays, pack relay (COM→NO), E-stop NC1, 3 A fuse, INA219, XT60, 10 Ω load.
+3. **Measurement:** 100 k/20 k cell dividers into ADS1115 #3 (0x4B); 15 k/22 k gas dividers into ADS1115 #1 (0x48, CO) and #2 (0x49, H2); DS18B20 1-Wire bus.
+4. **MCU_IO:** ESP32-DevKitC-32E, OLED, BME280, DS3231 RTC, microSD, MAX6675, 2 × PCF8574 status LEDs, buzzer, buttons.
+5. **Connectors:** the carrier board's off-board connectors and solder jumpers (added in v1.1).
+
+## Controller carrier PCB v1.1
+
+- 2-layer FR-4, 1.6 mm, 1 oz copper. 124 × 126 mm, 4 × M3 holes. Minimum track and gap 0.2 mm, minimum drill 0.4 mm (vias), via annular ring 0.2 mm.
+- Logic and signal currents only. Heater, load and pack currents stay off this board.
+- Screw terminals (5.08 mm): `+12V`, gate outputs to the off-board IRLZ44Ns, cell taps (≤ 16.8 V, kept on their own connector), and `+5V` from the XL4015, with 100 µF + 100 nF at the input.
+- Headers for the 4-channel relay module, the pack relay module and the INA219.
+- Plug-in sockets for the ESP32-DevKitC (rows 25.40 mm apart, per Espressif's DevKitC V4 drawing) and the 3 ADS1115 modules. The other modules use labelled sockets wired with jumper leads.
+- Net-class track widths: `+5V` 1.0 mm, `+3V3`/`GND`/`RLY_VCC` 0.5 mm, `+12V` 0.4 mm (TC4427 supply only), signals 0.25 mm. GND pours on both layers, stitched with vias.
+- **JP1 (relay module VCC):** 1-2 = `+5V` (default), 2-3 = `+3V3`.
+- **JP2 (MAX6675 SO):** 1-2 = shared SPI MISO (IO19, default), 2-3 = IO36. This is the fallback if the microSD module doesn't release MISO.
+
+Files in `v1.1/`:
+- Gerber zip and unpacked `gerbers/`;
+- ERC and DRC reports;
+- schematic PDF;
+- board BOM (`VS_Carrier_BOM_v1.1.csv`) and the full schematic BOM (`VS_BOM_v1.1_all.csv`);
+- 3D renders (top, isometric, bottom).
