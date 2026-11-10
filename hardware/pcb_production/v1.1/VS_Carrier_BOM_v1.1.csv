@@ -35,8 +35,8 @@ Item,Qty,References,Value,Footprint,Fit
 34,12,R36 R37 R38 R39 R40 R41 R42 R43 R44 R45 R46 R47,330,Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal,fit
 35,1,R48,1k,Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal,fit
 36,2,R49 R50,10k,Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal,fit
-37,1,SW1,Acknowledge,VentSense_Footprints:SW_Push_6mm_THT,fit
-38,1,SW2,Reset,VentSense_Footprints:SW_Push_6mm_THT,fit
+37,1,SW1,Acknowledge,Button_Switch_THT:SW_PUSH_6mm,fit
+38,1,SW2,Reset,Button_Switch_THT:SW_PUSH_6mm,fit
 39,1,U1,TC4427 (DIP-8),Package_DIP:DIP-8_W7.62mm,fit
 40,1,U4,ADS1115 #1 0x48 (CO),Connector_PinSocket_2.54mm:PinSocket_1x10_P2.54mm_Vertical,fit
 41,1,U5,ADS1115 #2 0x49 (H2),Connector_PinSocket_2.54mm:PinSocket_1x10_P2.54mm_Vertical,fit

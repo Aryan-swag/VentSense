@@ -10529,7 +10529,7 @@
 				)
 			)
 		)
-		(property "Footprint" "VentSense_Footprints:SW_Push_6mm_THT"
+		(property "Footprint" "Button_Switch_THT:SW_PUSH_6mm"
 			(at 308.61 95.25 0)
 			(hide yes)
 			(show_name no)
@@ -11760,7 +11760,7 @@
 				)
 			)
 		)
-		(property "Footprint" "VentSense_Footprints:SW_Push_6mm_THT"
+		(property "Footprint" "Button_Switch_THT:SW_PUSH_6mm"
 			(at 269.24 114.3 0)
 			(hide yes)
 			(show_name no)
