@@ -72,6 +72,51 @@
 		)
 	)
 	(sheet
+		(at 20.32 140)
+		(size 50.8 30.48)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "6074639d-9589-4771-b4f8-4830713344e1")
+		(property "Sheetname" "Connectors"
+			(at 20.32 139.25 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "Connectors.kicad_sch"
+			(at 20.32 171.08 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "VentSense_Stage2"
+				(path "/e587cf2d-dcdc-467f-9bf7-11a8151c0250"
+					(page "6")
+				)
+			)
+		)
+	)
+	(sheet
 		(at 152.4 45.72)
 		(size 50.8 30.48)
 		(exclude_from_sim no)
@@ -211,5 +256,4 @@
 			(page "1")
 		)
 	)
-	(embedded_fonts no)
 )

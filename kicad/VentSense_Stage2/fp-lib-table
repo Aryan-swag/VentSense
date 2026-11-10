@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "VentSense_Footprints")(type "KiCad")(uri "${KIPRJMOD}/VentSense_Footprints.pretty")(options "")(descr "VentSense custom footprints"))
+)

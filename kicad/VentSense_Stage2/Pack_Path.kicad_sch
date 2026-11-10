@@ -3475,6 +3475,29 @@
 			)
 		)
 	)
+	(global_label "RLY_VCC"
+		(shape input)
+		(at 160.02 71.12 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "f3352654-af92-4a33-b5ca-057b6059ae90")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 160.02 71.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x02")
 		(at 219.71 219.71 0)
@@ -3482,8 +3505,8 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
+		(on_board no)
+		(in_pos_files no)
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "19b9db5a-9592-4771-a9b7-b8800635345b")
@@ -3509,7 +3532,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_AMASS:AMASS_XT60-M_1x02_P7.20mm_Vertical"
 			(at 219.71 219.71 0)
 			(hide yes)
 			(show_name no)
@@ -3642,8 +3665,8 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
+		(on_board no)
+		(in_pos_files no)
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "2273f1f8-8ca4-4919-93ee-3d664bc22c9f")
@@ -3669,7 +3692,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "VentSense_Footprints:TerminalBlock_1x02_P5.08mm"
 			(at 213.36 80.01 0)
 			(hide yes)
 			(show_name no)
@@ -3725,8 +3748,8 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
+		(on_board no)
+		(in_pos_files no)
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "3aa46563-1027-441a-a06d-ba1bc70d567e")
@@ -3750,7 +3773,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "VentSense_Footprints:TerminalBlock_EStop_2NC_P5.08mm"
 			(at 208.28 205.74 0)
 			(hide yes)
 			(show_name no)
@@ -3811,8 +3834,8 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
+		(on_board no)
+		(in_pos_files no)
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "3bddc6f0-da4d-4544-ae96-5968daf1879a")
@@ -3838,7 +3861,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "VentSense_Footprints:TerminalBlock_1x02_P5.08mm"
 			(at 212.852 201.93 90)
 			(hide yes)
 			(show_name no)
@@ -3971,8 +3994,8 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
+		(on_board no)
+		(in_pos_files no)
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "57e88415-cce9-49f3-b2cb-9fbe17b89ee6")
@@ -3998,7 +4021,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "VentSense_Footprints:TerminalBlock_1x02_P5.08mm"
 			(at 234.95 131.826 90)
 			(hide yes)
 			(show_name no)
@@ -4086,8 +4109,8 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
+		(on_board no)
+		(in_pos_files no)
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "584e4143-924f-454e-9936-b7956aa07888")
@@ -4113,7 +4136,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "VentSense_Footprints:TerminalBlock_1x02_P5.08mm"
 			(at 234.95 105.156 90)
 			(hide yes)
 			(show_name no)
@@ -4201,8 +4224,8 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
+		(on_board no)
+		(in_pos_files no)
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "5bfcecce-b56c-483d-bbc5-1a3df805ac6e")
@@ -4228,7 +4251,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "VentSense_Footprints:TerminalBlock_1x02_P5.08mm"
 			(at 234.95 82.296 90)
 			(hide yes)
 			(show_name no)
@@ -4316,8 +4339,8 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
+		(on_board no)
+		(in_pos_files no)
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "5e54a950-f048-42b1-9125-d5a7e86d5fd9")
@@ -4343,7 +4366,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "VentSense_Footprints:TerminalBlock_1x02_P5.08mm"
 			(at 213.36 129.54 0)
 			(hide yes)
 			(show_name no)
@@ -4477,8 +4500,8 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
+		(on_board no)
+		(in_pos_files no)
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "a0971129-9683-40a9-9105-7d1a19ab49a8")
@@ -4504,7 +4527,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "VentSense_Footprints:TerminalBlock_1x02_P5.08mm"
 			(at 213.36 102.87 0)
 			(hide yes)
 			(show_name no)
@@ -4548,84 +4571,6 @@
 			(project "VentSense_Stage2"
 				(path "/e587cf2d-dcdc-467f-9bf7-11a8151c0250/b7bb9f5f-34df-423d-98be-1bb0477659eb"
 					(reference "F3")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:+5V")
-		(at 160.02 71.12 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "a5e2a808-b8e2-44e2-868d-28190c6554d6")
-		(property "Reference" "#PWR015"
-			(at 160.02 74.93 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "+5V"
-			(at 160.02 66.04 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 160.02 71.12 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 160.02 71.12 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"+5V\""
-			(at 160.02 71.12 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "03e87fd7-6879-4422-a353-0dd41c06fba8")
-		)
-		(instances
-			(project "VentSense_Stage2"
-				(path "/e587cf2d-dcdc-467f-9bf7-11a8151c0250/b7bb9f5f-34df-423d-98be-1bb0477659eb"
-					(reference "#PWR015")
 					(unit 1)
 				)
 			)
@@ -4872,8 +4817,8 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
+		(on_board no)
+		(in_pos_files no)
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "c0de49a3-49d4-4c6a-8539-9e24d0310ddf")
@@ -4897,7 +4842,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_1x06_P2.54mm_Vertical"
 			(at 187.96 208.28 0)
 			(hide yes)
 			(show_name no)
@@ -4964,8 +4909,8 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
+		(on_board no)
+		(in_pos_files no)
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "c514d32e-c079-4173-a24b-8bce53f9f623")
@@ -4991,7 +4936,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "VentSense_Footprints:TerminalBlock_1x02_P5.08mm"
 			(at 234.95 158.496 90)
 			(hide yes)
 			(show_name no)
@@ -5157,8 +5102,8 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
+		(on_board no)
+		(in_pos_files no)
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "ca70833b-b5f5-4be6-8ac5-2665932fc0f8")
@@ -5184,7 +5129,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "VentSense_Footprints:TerminalBlock_1x02_P5.08mm"
 			(at 197.612 227.33 90)
 			(hide yes)
 			(show_name no)
@@ -5239,8 +5184,8 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
+		(on_board no)
+		(in_pos_files no)
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "d8d03b5f-7bd5-4b0f-abc9-6384e72a6eb7")
@@ -5266,7 +5211,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "VentSense_Footprints:TerminalBlock_1x02_P5.08mm"
 			(at 213.36 156.21 0)
 			(hide yes)
 			(show_name no)
@@ -5322,8 +5267,8 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
+		(on_board no)
+		(in_pos_files no)
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "e42bf3ee-c877-42fa-b08b-d1d94e1131cb")
@@ -5347,7 +5292,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_1x06_P2.54mm_Vertical"
 			(at 187.96 229.87 0)
 			(hide yes)
 			(show_name no)
@@ -5414,8 +5359,8 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
+		(on_board no)
+		(in_pos_files no)
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "f309e470-b9c6-4ac2-980b-19ad4dc4131f")
@@ -5439,7 +5384,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_1x20_P2.54mm_Vertical"
 			(at 177.8 111.76 0)
 			(hide yes)
 			(show_name no)
