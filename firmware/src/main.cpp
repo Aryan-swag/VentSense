@@ -1,11 +1,11 @@
 // VentSense controller firmware (ESP32-DevKitC-32E, Arduino framework on FreeRTOS).
 //
 // Task layout (firmware/FEATURES.md section 0):
-//   safety task  - core 1, highest app priority, 10 Hz: read sensors -> vs_step -> drive relays.
-//                  Registered with the task watchdog; a hang reboots the chip, and GPIOs reset
-//                  to high-Z, which releases every relay (fail-secure).
+//   safety task  - core 1, highest app priority, 10 Hz: read sensors -> vs_step -> drive relays
+//                  and status LEDs. Registered with the task watchdog; a hang reboots the chip and
+//                  GPIOs reset to high-Z, which releases every relay (fail-secure).
 //   comms task   - core 0 (with the Wi-Fi stack): access point, web page + JSON API, serial
-//                  console, event log. It only reads a snapshot of the safety state; it can
+//                  console, OLED, microSD log. It only reads a snapshot of the safety state; it can
 //                  request the heater/load test modes and acknowledge alarms, never reset a latch.
 #include <Arduino.h>
 #include <WebServer.h>
@@ -28,7 +28,8 @@ namespace {
 
 void *g_core = nullptr;
 vs_config_t g_cfg;
-bool g_selftest_ok = false;
+volatile bool g_selftest_ok = false;
+char g_report[600];
 
 // shared between tasks
 portMUX_TYPE g_mux = portMUX_INITIALIZER_UNLOCKED;
@@ -38,6 +39,13 @@ volatile bool g_req_heater = false, g_req_load = true, g_req_ack = false, g_oper
 QueueHandle_t g_events;
 
 float now_s() { return (float)(esp_timer_get_time() / 1000) / 1000.0f; }
+
+void snapshot(vs_inputs_t &in, vs_outputs_t &out) {
+    portENTER_CRITICAL(&g_mux);
+    in = g_snap_in;
+    out = g_snap_out;
+    portEXIT_CRITICAL(&g_mux);
+}
 
 // ------------------------------------------------------------------ safety task
 void safety_task(void *) {
@@ -55,6 +63,7 @@ void safety_task(void *) {
         in.load_request = g_req_load ? 1 : 0;
         vs_step(g_core, &in, &out);
         hal_write(out, in.t_s);
+        hal_leds(out, in.armed);
         if (g_req_ack && !in.ack_pressed) g_req_ack = false;
         vs_event_t ev;
         while (vs_pop_event(g_core, &ev)) xQueueSend(g_events, &ev, 0);
@@ -69,6 +78,7 @@ void safety_task(void *) {
 
 // ------------------------------------------------------------------ comms task
 WebServer server(80);
+float g_tc = NAN;
 
 const char INDEX_HTML[] PROGMEM = R"HTML(<!doctype html><html><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>VentSense</title>
@@ -77,27 +87,26 @@ const char INDEX_HTML[] PROGMEM = R"HTML(<!doctype html><html><head><meta charse
 <h2>VentSense <span id="lvl"></span></h2><table id="t"></table><pre id="raw"></pre>
 <script>
 async function tick(){try{const s=await (await fetch('/api/state')).json();
-document.getElementById('lvl').textContent='Level '+s.level;document.getElementById('lvl').className='l'+s.level;
+document.getElementById('lvl').textContent='Level '+s.level+(s.armed?'':' (NOT ARMED)');document.getElementById('lvl').className='l'+s.level;
 let h='<tr><th>cell</th><th>V</th><th>T</th><th>CO rise</th><th>H2 rise</th><th>relay</th><th>level</th></tr>';
 s.cells.forEach((c,i)=>{h+=`<tr class="l${c.level}"><td>${i+1}</td><td>${c.v.toFixed(3)}</td><td>${c.t.toFixed(1)}</td>`+
 `<td>${(c.co*100).toFixed(0)}%</td><td>${(c.h2*100).toFixed(0)}%</td><td>${c.relay?'IN':'BYPASS'}</td><td>${c.level}</td></tr>`});
 document.getElementById('t').innerHTML=h;document.getElementById('raw').textContent=
-`pack ${s.pack_v.toFixed(2)} V  ${s.pack_i.toFixed(3)} A  relay ${s.pack_relay?'ON':'OFF'}  alerts 0x${s.alerts.toString(16)}`;}catch(e){}}
+`pack ${s.pack_v.toFixed(2)} V  ${s.pack_i.toFixed(3)} A  relay ${s.pack_relay?'ON':'OFF'}  ref TC ${s.tc}  alerts 0x${s.alerts.toString(16)}`;}catch(e){}}
 setInterval(tick,1000);tick();
 </script></body></html>)HTML";
 
 void handle_state() {
     vs_inputs_t in;
     vs_outputs_t out;
-    portENTER_CRITICAL(&g_mux);
-    in = g_snap_in;
-    out = g_snap_out;
-    portEXIT_CRITICAL(&g_mux);
+    snapshot(in, out);
     String j;
-    j.reserve(700);
-    j += "{\"t\":" + String(in.t_s, 1) + ",\"level\":" + String(out.level) + ",\"alerts\":" + String(out.alerts) +
+    j.reserve(800);
+    j += "{\"t\":" + String(in.t_s, 1) + ",\"level\":" + String(out.level) + ",\"armed\":" + String(in.armed) +
+         ",\"selftest\":" + String(g_selftest_ok ? 1 : 0) + ",\"alerts\":" + String(out.alerts) +
          ",\"pack_relay\":" + String(out.pack_relay_on) + ",\"pack_v\":" + String(in.pack_bus_v, 3) +
-         ",\"pack_i\":" + String(in.pack_current_a, 3) + ",\"cells\":[";
+         ",\"pack_i\":" + String(in.pack_current_a, 3) + ",\"tc\":" + (isnan(g_tc) ? String("null") : String(g_tc, 2)) +
+         ",\"cells\":[";
     for (int k = 0; k < VS_NCELL; ++k) {
         if (k) j += ",";
         const float v = isnan(out.cell_v[k]) ? 0.0f : out.cell_v[k];
@@ -110,7 +119,9 @@ void handle_state() {
     server.send(200, "application/json", j);
 }
 
-void command(const String &c) {
+String command(const String &c) {
+    char reply[700];
+    reply[0] = 0;
     if (c == "heater on") g_req_heater = true;
     else if (c == "heater off") g_req_heater = false;
     else if (c == "load on") g_req_load = true;
@@ -118,40 +129,86 @@ void command(const String &c) {
     else if (c == "ack") g_req_ack = true;
     else if (c == "arm") g_operator_armed = true;
     else if (c == "disarm") g_operator_armed = false;
-    else hal_mock_command(c.c_str());  // mock build: inject faults; real build: ignored
+    else if (c == "selftest") {
+        g_selftest_ok = hal_selftest(g_report, sizeof g_report);
+        return String(g_report);
+    } else {
+        hal_command(c.c_str(), reply, sizeof reply);  // mock: fault injection; real: probes, calibration
+        return reply[0] ? String(reply) : String("unknown command: ") + c;
+    }
+    return String("ok: ") + c;
 }
 
 void handle_cmd() {
     // TODO (P1.1 / rule 5): require the admin password before accepting commands.
-    if (server.hasArg("c")) command(server.arg("c"));
-    server.send(200, "text/plain", "ok");
+    String r = server.hasArg("c") ? command(server.arg("c")) : String("missing ?c=");
+    server.send(200, "text/plain", r);
+}
+
+void log_row(const vs_inputs_t &in, const vs_outputs_t &out) {
+    // 1 Hz data row for the black box (P1.2): time, level, alerts, pack V/I, then per cell V,T,CO,H2,relay,level
+    char ts[32], line[400];
+    hal_timestamp(ts, sizeof ts);
+    int o = snprintf(line, sizeof line, "D,%s,%.1f,%d,%lu,%.3f,%.4f,%.2f", ts, in.t_s, out.level, (unsigned long)out.alerts,
+                     in.pack_bus_v, in.pack_current_a, g_tc);
+    for (int k = 0; k < VS_NCELL && o < (int)sizeof line; ++k)
+        o += snprintf(line + o, sizeof line - o, ",%.4f,%.2f,%.4f,%.4f,%d,%d", out.cell_v[k], in.cell[k].temp_c,
+                      in.cell[k].co_v, in.cell[k].h2_v, out.seg_relay_on[k], out.cell_level[k]);
+    hal_log(line);
 }
 
 void comms_task(void *) {
     WiFi.mode(WIFI_AP);
     WiFi.softAP(VS_AP_SSID, VS_AP_PASS);
-    WiFi.setTxPower(WIFI_POWER_8_5dBm);  // lower TX peaks on the AMS1117 3.3 V rail (smart_features.md section 4)
+    WiFi.setTxPower(WIFI_POWER_8_5dBm);  // lower TX peaks on the AMS1117 3.3 V rail (FEATURES.md section 4)
     server.on("/", [] { server.send_P(200, "text/html", INDEX_HTML); });
     server.on("/api/state", handle_state);
     server.on("/api/cmd", handle_cmd);
     server.begin();
-    Serial.printf("AP %s at %s\n", VS_AP_SSID, WiFi.softAPIP().toString().c_str());
+    const bool sd = hal_log_begin();
+    Serial.printf("AP %s at %s, microSD log %s\n", VS_AP_SSID, WiFi.softAPIP().toString().c_str(), sd ? "on" : "off");
+    hal_log("# VentSense log: D=data row, E=event row");
     String line;
+    uint32_t next_ui = 0, next_log = 0, next_flush = 0;
     for (;;) {
         server.handleClient();
         while (Serial.available()) {
             const char ch = (char)Serial.read();
             if (ch == '\n' || ch == '\r') {
                 line.trim();
-                if (line.length()) command(line);
+                if (line.length()) Serial.println(command(line));
                 line = "";
             } else {
                 line += ch;
             }
         }
         vs_event_t ev;
-        while (xQueueReceive(g_events, &ev, 0) == pdTRUE)  // TODO P1.2: also to SD with RTC time
-            Serial.printf("EV,%.1f,%d,%d,%d\n", ev.t_s, (int)ev.type, (int)ev.cell, (int)ev.detail);
+        while (xQueueReceive(g_events, &ev, 0) == pdTRUE) {
+            char ts[32], row[96];
+            hal_timestamp(ts, sizeof ts);
+            snprintf(row, sizeof row, "E,%s,%.1f,%d,%d,%d", ts, ev.t_s, (int)ev.type, (int)ev.cell, (int)ev.detail);
+            Serial.println(row);
+            hal_log(row);
+        }
+        const uint32_t now = millis();
+        g_tc = hal_tc_read();
+        if (now >= next_ui || now >= next_log) {
+            vs_inputs_t in;
+            vs_outputs_t out;
+            snapshot(in, out);
+            if (now >= next_ui) {
+                hal_ui_update(in, out, in.armed);
+                next_ui = now + 1000;
+            }
+            if (now >= next_log) {
+                log_row(in, out);
+                next_log = now + 1000;
+            }
+        }
+        if (now >= next_flush) {
+            hal_log_flush();
+            next_flush = now + 5000;
+        }
         vTaskDelay(pdMS_TO_TICKS(5));
     }
 }
@@ -161,12 +218,11 @@ void comms_task(void *) {
 void setup() {
     hal_gpio_init();  // first: every output LOW (relays released, heater and load off)
     Serial.begin(115200);
-    vs_default_config(&g_cfg);  // TODO P1.7: load calibration + thresholds from NVS
+    vs_default_config(&g_cfg);  // TODO P1.7: load thresholds from NVS
     g_core = vs_create(&g_cfg);
     g_events = xQueueCreate(64, sizeof(vs_event_t));
-    g_selftest_ok = hal_init();
-    Serial.printf("VentSense firmware, mock sensors=%d, self-test %s\n", (int)VS_MOCK_SENSORS,
-                  g_selftest_ok ? "PASSED" : "FAILED (relays stay released)");
+    g_selftest_ok = hal_init(g_report, sizeof g_report);
+    Serial.printf("VentSense firmware, mock sensors=%d\n%s", (int)VS_MOCK_SENSORS, g_report);
 
 #if defined(ESP_ARDUINO_VERSION_MAJOR) && ESP_ARDUINO_VERSION_MAJOR >= 3
     esp_task_wdt_config_t wc = {};

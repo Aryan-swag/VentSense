@@ -5,6 +5,7 @@
 //   clear                                        remove all injected faults
 #if VS_MOCK_SENSORS
 #include <Arduino.h>
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -20,7 +21,12 @@ float room = 0.0f;
 float noise(float amp) { return amp * ((float)(esp_random() % 2001) / 1000.0f - 1.0f); }
 }  // namespace
 
-bool hal_init() { return true; }  // every mock sensor "answers"
+bool hal_init(char *report, size_t n) { return hal_selftest(report, n); }
+
+bool hal_selftest(char *report, size_t n) {
+    snprintf(report, n, "SELF-TEST PASSED (MOCK: every sensor is simulated, nothing is measured)\n");
+    return true;
+}
 
 void hal_read(vs_inputs_t &in) {
     float node = 0.0f;
@@ -48,8 +54,17 @@ void hal_read(vs_inputs_t &in) {
     in.current_ok = in.bus_ok = in.ambient_ok = 1;
 }
 
-void hal_mock_command(const char *cmd) {
+void hal_leds(const vs_outputs_t &, bool) {}
+void hal_ui_update(const vs_inputs_t &, const vs_outputs_t &, bool) {}
+float hal_tc_read() { return 28.0f + noise(0.25f); }
+bool hal_log_begin() { return false; }
+void hal_log(const char *) {}
+void hal_log_flush() {}
+void hal_timestamp(char *buf, size_t n) { snprintf(buf, n, "uptime %lu s", (unsigned long)(millis() / 1000)); }
+
+void hal_command(const char *cmd, char *reply, size_t n) {
     int k = 0;
+    reply[0] = 0;
     if (sscanf(cmd, "gas %d", &k) == 1 && k >= 1 && k <= 4) gas_extra[k - 1] = 0.6f;
     else if (sscanf(cmd, "temp %d", &k) == 1 && k >= 1 && k <= 4) temp_extra[k - 1] = 25.0f;
     else if (sscanf(cmd, "sag %d", &k) == 1 && k >= 1 && k <= 4) sag[k - 1] = 0.25f;
@@ -61,6 +76,9 @@ void hal_mock_command(const char *cmd) {
             unplugged[i] = false;
         }
         room = 0.0f;
+    } else {
+        return;
     }
+    snprintf(reply, n, "mock: %s", cmd);
 }
 #endif

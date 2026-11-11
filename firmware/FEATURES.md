@@ -7,7 +7,13 @@ Status of every item: **planned** unless marked below. Mark it done here when it
 - Build-order steps 1 and 2 are done.
   - **Safety core** in `firmware/lib/safety_core`: voting, latching, P1.3, P1.4, P1.5, P1.6 logic, heater limits and the IR estimator. 22/22 native unit tests pass.
   - **Digital twin** in `sim/`: 29/29 scenario checks pass. Monte Carlo: 0/40 false trips, 40/40 failing cells isolated, max latency 0.6 s after the 2nd signal.
-- Step 3 is started. The **ESP32 skeleton** (tasks, watchdog, mock sensors, basic web page + JSON API) compiles.
+- Step 3 is done: the **ESP32 skeleton** (tasks, watchdog, mock sensors, basic web page + JSON API) compiles.
+- Step 4 is written and compiles, but is **untested on hardware**. Real drivers for all modules, plus:
+  - P1.8 self-test (arming needs 3 × ADS1115, the INA219 and 4 mapped DS18B20s);
+  - P2.8 LEDs and OLED;
+  - 1 Hz SD logging (P1.2 base);
+  - tap calibration commands (P1.7 base).
+  - Bring-up steps are in `BRINGUP.md`.
 
 ## 0. Safety rules (apply to every feature)
 
@@ -76,7 +82,7 @@ Status of every item: **planned** unless marked below. Mark it done here when it
 - The simulation validates logic and timing against modelled faults. It does **not** prove detection on real cells.
 - "Isolation < 1 s" must be measured on the hardware.
 
-## 6. Build order (steps 1-2 done, 3 started)
+## 6. Build order (steps 1-3 done; step 4 written and compiling, waiting for modules)
 
 1. Safety core + logic tests (Level 1).
 2. Digital twin (Level 2).
