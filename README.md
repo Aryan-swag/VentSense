@@ -17,6 +17,8 @@ Our claim is narrow: **2-of-3 voting across dissimilar signals plus per-cell iso
 | Stage 2 exports (schematic PDF/PNG, ERC/DRC, BOM CSV) | as submitted at Stage 2 (Oct 2026) | [`exports/`](exports/) |
 | Bill of materials | Rev 2.1 Final | [`bom/`](bom/) |
 | Mechanical CAD (SolidWorks) and wax thermal study | | [`ventsense_cad/`](ventsense_cad/) |
+| Controller firmware (ESP32, PlatformIO) | safety core: 22/22 unit tests pass; ESP32 build compiles | [`firmware/`](firmware/) (feature plan: [`firmware/FEATURES.md`](firmware/FEATURES.md)) |
+| Digital twin (software-in-the-loop simulation) | 29/29 scenario checks; 0/40 false trips; 40/40 failing cells isolated | [`sim/`](sim/) (results: [`sim/out/summary.md`](sim/out/summary.md)) |
 | Superseded v1.0 PCB outputs | archived, do not order | [`PCB/archive_v1.0/`](PCB/archive_v1.0/) |
 
 ## Schematic sheets
@@ -39,3 +41,18 @@ Our claim is narrow: **2-of-3 voting across dissimilar signals plus per-cell iso
 - **JP2 (MAX6675 SO):** 1-2 = shared SPI MISO (IO19, default), 2-3 = IO36. This is the fallback if the microSD module doesn't release MISO.
 
 All PCB files (Gerbers, drill files, BOM, reports, renders) and the ordering note are in [`PCB/`](PCB/).
+
+## Firmware and simulation
+
+- **Safety core** ([`firmware/lib/safety_core`](firmware/lib/safety_core)): hardware-free C++. It covers:
+  - 2-of-3 voting across gas, temperature and voltage, with a 90 s correlation window;
+  - Level 1/2/3 latching, cleared only by the physical reset;
+  - room-gas (common-mode) rejection, rate-of-rise triggers and sensor-fault detection;
+  - relay verification and heater limits.
+- **The same source runs in three places:** on the ESP32, in the native unit tests, and inside the digital twin.
+- **Digital twin** ([`sim/`](sim/)): models the cells, wax jacket, vent gas, sensors and heater rig, with the real safety core in the loop.
+  - Fault profiles and model parameters are **assumed** (tagged in `sim/params.py`).
+  - The results show the firmware logic and timing behave as designed against modelled faults. They are not measurements on real cells.
+
+![Cell 3 failing: digital twin](sim/out/cell3_runaway.png)
+
