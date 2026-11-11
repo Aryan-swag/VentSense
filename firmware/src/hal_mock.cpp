@@ -60,6 +60,8 @@ float hal_tc_read() { return 28.0f + noise(0.25f); }
 bool hal_log_begin() { return false; }
 void hal_log(const char *) {}
 void hal_log_flush() {}
+void hal_rtc_set(uint32_t) {}
+bool hal_sd_ready() { return false; }
 void hal_timestamp(char *buf, size_t n) { snprintf(buf, n, "uptime %lu s", (unsigned long)(millis() / 1000)); }
 
 void hal_command(const char *cmd, char *reply, size_t n) {

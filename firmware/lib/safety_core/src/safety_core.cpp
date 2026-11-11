@@ -82,6 +82,7 @@ class Core {
     float pack_change_t = 0.0f;
     uint32_t alerts_prev = 0;
     bool heater_cut = false, duty_block = false;
+    bool uv_lock = false;  // undervoltage load cutoff, cleared when the operator releases the load request
     uint8_t heater_prev = 0;
     float duty = 0.0f;
 
@@ -380,6 +381,11 @@ void Core::step(const vs_inputs_t &in, vs_outputs_t &out) {
         (in.heater_request && hvalid && !heater_cut && !duty_block && nlatched == 0 && !pack_latched) ? 1 : 0;
     heater_prev = heater_on;
 
+    // ------------------------------------------------------------ undervoltage load cutoff (over-discharge protection)
+    for (int k = 0; k < VS_NCELL; ++k)
+        if (in_str[k] && cv[k] < cfg.cell_uv_v && cv[k] >= cfg.cell_v_min_valid) uv_lock = true;
+    if (uv_lock && !in.load_request) uv_lock = false;  // operator turned the load off: re-arm (re-trips if still low)
+
     // ------------------------------------------------------------ levels, alerts, buzzer
     uint32_t alerts = 0;
     if (ambient_gas) alerts |= VS_ALERT_AMBIENT_GAS;
@@ -389,6 +395,7 @@ void Core::step(const vs_inputs_t &in, vs_outputs_t &out) {
     if (heater_cut) alerts |= VS_ALERT_HEATER_CUTOFF;
     if (duty_block && in.heater_request) alerts |= VS_ALERT_HEATER_DUTY;
     if (!armed) alerts |= VS_ALERT_NOT_ARMED;
+    if (uv_lock) alerts |= VS_ALERT_UNDERVOLT;
     uint8_t level = 0;
     for (int k = 0; k < VS_NCELL; ++k) {
         bool any = cell[k].faults != 0;
@@ -398,7 +405,8 @@ void Core::step(const vs_inputs_t &in, vs_outputs_t &out) {
         if (out.cell_level[k] > level) level = out.cell_level[k];
     }
     const uint32_t level1_alerts =
-        VS_ALERT_AMBIENT_GAS | VS_ALERT_RELAY_MISMATCH | VS_ALERT_CURRENT_FAULT | VS_ALERT_AMBIENT_FAULT | VS_ALERT_SENSOR_FAULT;
+        VS_ALERT_AMBIENT_GAS | VS_ALERT_RELAY_MISMATCH | VS_ALERT_CURRENT_FAULT | VS_ALERT_AMBIENT_FAULT | VS_ALERT_SENSOR_FAULT |
+        VS_ALERT_UNDERVOLT;
     if (level < 1 && (alerts & level1_alerts)) level = 1;
     if (pack_latched) level = 3;
     const uint32_t ach = alerts ^ alerts_prev;
@@ -428,10 +436,13 @@ void Core::step(const vs_inputs_t &in, vs_outputs_t &out) {
         out.temp_rate_c_per_min[k] = trate[k];
         out.volt_dev_v[k] = vdev[k];
         out.trip_time_s[k] = cell[k].trip_t;
+        out.gas_base_co[k] = cell[k].co_base;
+        out.gas_base_h2[k] = cell[k].h2_base;
+        out.in_string[k] = in_str[k] ? 1 : 0;
     }
     out.pack_relay_on = pack_cmd;
     out.heater_on = heater_on;
-    out.load_on = (in.load_request && pack_cmd && !pack_latched) ? 1 : 0;
+    out.load_on = (in.load_request && pack_cmd && !pack_latched && !uv_lock) ? 1 : 0;
     out.level = level;
     out.pack_latched = pack_latched;
     out.alerts = alerts;
@@ -475,6 +486,7 @@ void vs_default_config(vs_config_t *c) {
     c->temp_valid_max_c = 120.0f;      // DS18B20 range is -55..125 C; 85.0 power-on value is handled by the driver
     c->volt_sag_v = 0.10f;             // PLACEHOLDER
     c->cell_v_min_valid = 0.5f;        // PLACEHOLDER
+    c->cell_uv_v = 3.0f;               // PLACEHOLDER above the 25R 2.5 V discharge cut-off (datasheet, to verify)
     for (int k = 0; k < VS_NCELL; ++k) {
         c->ir_ohm[k] = 0.0f;
         c->segment_enabled[k] = 1;

@@ -17,13 +17,21 @@ Every number is in `params.py` and tagged SPEC, DATASHEET or **ASSUMED**. Replac
 ## Run
 
 ```
-python3 run_all.py            # 8 scenarios + 40+40 Monte Carlo runs, about 75 s
+python3 run_all.py            # 9 scenarios + 40+40 Monte Carlo runs, about 90 s
 python3 run_all.py --mc 0     # scenarios only
 ```
 
 Outputs:
 - `out/summary.md`: every check (pass/fail) and the Monte Carlo statistics;
 - `out/<scenario>.png`: timeline plots (gas, temperature, cell voltage, pack current, level), for slides.
+
+## Dashboard on the laptop
+
+```
+python3 dash_server.py --speed 5     # http://localhost:8080, admin password ventsense-admin
+```
+
+This serves the real dashboard (`../firmware/web/index.html`) and the ESP32 API (`../firmware/API.md`) from a live twin. In the Console box you can type `fault 3` (failing cell), `room` (incense), `h2 1` (hydrogen into a pocket), `irtest`, `ir baseline`, `ack`, or `reset` (the simulated physical button).
 
 ## Scenarios (`scenarios.py`)
 
@@ -37,6 +45,7 @@ Outputs:
 | `heater_only` | Heater on a dummy cell: 55 °C firmware cutoff, 50 % duty cap, KSD301 backup |
 | `rig_vote` | Planned rig demo: H2 into the dummy pocket, then heater: 2-of-3 vote |
 | `late_second` | H2 pulse, then heat after the window expired: no vote |
+| `ir_health` | Firmware IR test per cell (DCIR at 1 s) before and after synthetic ageing of cell 2; health indicator; bar chart `out/ir_health_bars.png` |
 
 ## Limits
 

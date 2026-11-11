@@ -14,6 +14,10 @@ Status of every item: **planned** unless marked below. Mark it done here when it
   - 1 Hz SD logging (P1.2 base);
   - tap calibration commands (P1.7 base).
   - Bring-up steps are in `BRINGUP.md`.
+- **11 Nov (later): every P1 and P2 feature is implemented.** 39 unit tests pass and both ESP32 builds compile. The digital twin passes 35/35 checks, including the internal-resistance test (within 2 % of the model) and the health indicator flagging an aged cell. The dashboard was tested in a browser against the twin (`sim/dash_server.py`).
+  - **Status of each feature: implemented, not yet run on hardware.**
+  - **New P1.9:** undervoltage load cutoff. It was found in the twin: the rig has no BMS, so the 10 Ω load could over-discharge the cells.
+  - **P3 (ML, trend prediction, cloud):** not started.
 
 ## 0. Safety rules (apply to every feature)
 
@@ -39,6 +43,7 @@ Status of every item: **planned** unless marked below. Mark it done here when it
 | P1.5 | **Sensor self-diagnostics** | Detects a missing or disconnected DS18B20 (−127 °C / power-on 85 °C), MQ open or short (ADC near the rails), ADS1115/INA219/BME280 not answering on I2C, and stuck readings. A faulted sensor is shown on the OLED, LEDs and dashboard and never counts as "active". Open question for Aryan/Pranav (FMEA): should a faulted sensor make the remaining signals trip alone (more trips) or not (current default: not)? |
 | P1.6 | **Relay verification** | After every relay command, check node voltages: an in-string cell reads about its cell voltage (node k − node k−1); a bypassed cell reads about 0 V. A mismatch means a stuck or welded relay, which is a Level 1 alert. The pack relay is checked through the INA219 bus voltage. |
 | P1.7 | **Calibration wizard and settings** | Web page for the per-channel two-point voltage calibration (enter the multimeter readings) and for thresholds, the correlation window (60–120 s) and the heater cell. Stored in ESP32 flash (NVS). Every change is logged. |
+| P1.9 | **Undervoltage load cutoff** | If any in-string cell falls below `cell_uv_v` (placeholder 3.0 V; the 25R cut-off is 2.5 V, to verify), the load switches off with an alert until the operator turns the load off and on again. Added 11 Nov after the twin showed over-discharge |
 | P1.8 | **Power-up self-test** | Check every sensor, I2C address and relay (verified one at a time). Only then energise cells into the string. Result shown on the OLED and dashboard. |
 
 ## 2. Priority 2 — health and connectivity features

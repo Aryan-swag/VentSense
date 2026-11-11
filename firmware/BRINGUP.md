@@ -49,7 +49,14 @@ Plug in each module, then type `selftest`:
 3. With the self-test passing and the system armed (`arm`), all relays should click in. Then `disarm` → all should release.
 4. Watch for the `RELAY_MISMATCH` alert (event type 8, detail 2) once cells are connected. It means a relay isn't doing what it's told.
 
-## 7. Remaining checks
+## 7. Dashboard, relay check and IR baseline
+1. **Dashboard:** open `http://192.168.4.1`, enter the admin password (default `ventsense-admin`), then change it with `admin <new>` (8+ characters).
+2. **Relay check:** at power-up, after the self-test passes, the relay check runs (about 9 s of clicks). Expect `Relay check passed` in the event log. If it fails, the message names the cell and the cause. The most common cause is the E-stop pressed or the pack path open.
+3. **IR baseline (commissioning):** with healthy, charged cells and the load on, press **Run IR test** on the Health tab. Then press **Save latest as baseline**. The health indicator and the sag compensation use this baseline.
+4. **Undervoltage cutoff:** with a cell discharged near 3.0 V, check that the load switches off and the alert appears. Set `cell_uv_v` from the Settings tab.
+5. **Optional:** `wifi <ssid> <password>` sets the clock from the network; `ntfy <random-topic>` sends phone alerts through the ntfy app. Don't use a topic that identifies you.
+
+## 8. Remaining checks
 - **INA219 sign:** discharge must read **positive**. If it's negative, swap VIN+/VIN− (pack side goes to VIN+).
 - **microSD + MAX6675 sharing MISO:** with the SD card CS high, MISO must float. If the thermocouple reading is garbage (`tc` null or stuck), move JP2 to 2-3 and rebuild with `-DVS_TC_ON_IO36=1`.
 - **Heater test** (dummy cell in segment 1):

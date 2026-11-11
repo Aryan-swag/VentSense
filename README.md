@@ -17,8 +17,8 @@ Our claim is narrow: **2-of-3 voting across dissimilar signals plus per-cell iso
 | Stage 2 exports (schematic PDF/PNG, ERC/DRC, BOM CSV) | as submitted at Stage 2 (Oct 2026) | [`exports/`](exports/) |
 | Bill of materials | Rev 2.1 Final | [`bom/`](bom/) |
 | Mechanical CAD (SolidWorks) and wax thermal study | | [`ventsense_cad/`](ventsense_cad/) |
-| Controller firmware (ESP32, PlatformIO) | safety core: 22/22 unit tests pass; real-sensor and mock ESP32 builds compile (hardware bring-up pending) | [`firmware/`](firmware/) (feature plan: [`firmware/FEATURES.md`](firmware/FEATURES.md)) |
-| Digital twin (software-in-the-loop simulation) | 29/29 scenario checks; 0/40 false trips; 40/40 failing cells isolated | [`sim/`](sim/) (results: [`sim/out/summary.md`](sim/out/summary.md)) |
+| Controller firmware (ESP32, PlatformIO) | 39/39 unit tests pass; Wi-Fi dashboard, IR test, health indicator, relay self-check; both ESP32 builds compile (hardware bring-up pending) | [`firmware/`](firmware/) (feature plan: [`firmware/FEATURES.md`](firmware/FEATURES.md)) |
+| Digital twin (software-in-the-loop simulation) | 35/35 scenario checks; 0/40 false trips; 40/40 failing cells isolated; IR test within 2 % | [`sim/`](sim/) (results: [`sim/out/summary.md`](sim/out/summary.md)) |
 | Superseded v1.0 PCB outputs | archived, do not order | [`PCB/archive_v1.0/`](PCB/archive_v1.0/) |
 
 ## Schematic sheets

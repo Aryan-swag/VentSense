@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VentSense Monitor</title>
+<style>
+:root{color-scheme:light;
+ --bg:#f4f4f1;--surface:#fcfcfb;--surface2:#f0efec;--line:#e2e1dc;--ink:#0b0b0b;--ink2:#52514e;--muted:#8a8984;
+ --c1:#2a78d6;--c2:#eb6834;--c3:#1baf7a;--c4:#eda100;
+ --good:#0ca30c;--warn:#fab219;--serious:#ec835a;--crit:#d03b3b;--accent:#2a78d6}
+@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])){color-scheme:dark;
+ --bg:#121211;--surface:#1a1a19;--surface2:#242422;--line:#33332f;--ink:#f0efec;--ink2:#c3c2b7;--muted:#8f8e86;
+ --c1:#3987e5;--c2:#d95926;--c3:#199e70;--c4:#c98500;--accent:#3987e5}}
+:root[data-theme="dark"]{color-scheme:dark;
+ --bg:#121211;--surface:#1a1a19;--surface2:#242422;--line:#33332f;--ink:#f0efec;--ink2:#c3c2b7;--muted:#8f8e86;
+ --c1:#3987e5;--c2:#d95926;--c3:#199e70;--c4:#c98500;--accent:#3987e5}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--surface);border-bottom:1px solid var(--line);padding:10px 16px;
+ display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
+header h1{font-size:17px;margin:0;letter-spacing:.2px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-weight:600;font-size:13px;
+ border:1px solid var(--line);background:var(--surface2)}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
+.meta{color:var(--ink2);font-size:12.5px}
+.banner{width:100%;background:var(--warn);color:#0b0b0b;font-weight:600;padding:4px 10px;border-radius:6px;font-size:13px}
+nav{display:flex;gap:2px;overflow-x:auto;padding:0 16px;background:var(--surface);border-bottom:1px solid var(--line)}
+nav button{all:unset;cursor:pointer;padding:10px 12px;color:var(--ink2);border-bottom:2px solid transparent;white-space:nowrap}
+nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+main{padding:16px;max-width:1200px;margin:0 auto}
+section{display:none}section.on{display:block}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.card h3{margin:0 0 8px;font-size:14px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.swatch{width:12px;height:12px;border-radius:3px;display:inline-block;margin-right:6px;vertical-align:-1px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font-variant-numeric:tabular-nums}
+.kv span:nth-child(odd){color:var(--ink2)}.kv span:nth-child(even){text-align:right}
+.big{font-size:24px;font-weight:650;font-variant-numeric:tabular-nums}
+.sub{color:var(--ink2);font-size:12.5px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink2);font-weight:600;font-size:12.5px}
+.chart{position:relative;margin-bottom:6px}
+.chart canvas{width:100%;height:220px;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--ink2);margin:2px 0 6px}
+.tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--line);border-radius:6px;
+ padding:6px 8px;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.15);display:none;white-space:nowrap;z-index:3}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0}
+button.b,input[type=submit]{cursor:pointer;border:1px solid var(--line);background:var(--surface2);color:var(--ink);
+ padding:7px 12px;border-radius:8px;font:inherit}
+button.b:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+input,select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:6px 8px}
+input[type=number]{width:110px}
+pre{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:10px;white-space:pre-wrap;
+ font:12.5px/1.4 ui-monospace,Menlo,Consolas,monospace;margin:8px 0;max-height:320px;overflow:auto}
+.warnbox{border-left:4px solid var(--warn);padding:6px 10px;background:var(--surface2);border-radius:6px;margin:8px 0}
+.small{font-size:12px;color:var(--ink2)}
+.right{margin-left:auto}
+</style>
+</head>
+<body>
+<header>
+ <h1>VentSense</h1>
+ <span id="lvl" class="pill"><span class="dot"></span><span>—</span></span>
+ <span id="arm" class="pill">—</span>
+ <span class="meta" id="clock">connecting…</span>
+ <span class="right meta"><label>Admin password <input id="key" type="password" size="12" autocomplete="off"></label>
+  <button class="b" id="theme" title="Light / dark">◐</button></span>
+ <div id="banner" class="banner" hidden></div>
+</header>
+<nav role="tablist" id="tabs">
+ <button role="tab" data-t="live" aria-selected="true">Live</button>
+ <button role="tab" data-t="trends">Trends</button>
+ <button role="tab" data-t="events">Events &amp; incidents</button>
+ <button role="tab" data-t="health">Health</button>
+ <button role="tab" data-t="control">Control</button>
+ <button role="tab" data-t="settings">Settings</button>
+</nav>
+<main>
+<section id="live" class="on">
+ <div class="grid" id="cells"></div>
+ <div class="grid" style="margin-top:12px">
+  <div class="card"><h3>Pack</h3><div class="kv" id="pack"></div></div>
+  <div class="card"><h3>Alerts</h3><div id="alerts" class="sub">—</div></div>
+  <div class="card"><h3>Environment &amp; tests</h3><div class="kv" id="env"></div></div>
+ </div>
+</section>
+
+<section id="trends">
+ <p class="sub">Last 10 minutes, 1 sample per second. Hover a chart to read values.</p>
+ <div class="card"><h3>Cell temperature (°C)</h3><div class="legend" data-for="cT"></div><div class="chart"><canvas id="cT"></canvas><div class="tip"></div></div></div>
+ <div class="card" style="margin-top:12px"><h3>Gas rise above baseline (%), larger of MQ-7 / MQ-8</h3><div class="legend" data-for="cG"></div><div class="chart"><canvas id="cG"></canvas><div class="tip"></div></div></div>
+ <div class="card" style="margin-top:12px"><h3>Cell voltage (V)</h3><div class="legend" data-for="cV"></div><div class="chart"><canvas id="cV"></canvas><div class="tip"></div></div></div>
+ <div class="card" style="margin-top:12px"><h3>Pack current (A)</h3><div class="chart"><canvas id="cI"></canvas><div class="tip"></div></div></div>
+</section>
+
+<section id="events">
+ <div class="card"><h3>Last incident</h3><div id="lastinc" class="sub">No Level 2/3 trip since power-up.</div></div>
+ <div class="card" style="margin-top:12px"><h3>Incident files (microSD) <span class="small" id="sdstate"></span></h3><div id="incs" class="sub">—</div></div>
+ <div class="card" style="margin-top:12px"><h3>Event log (newest first)</h3>
+  <table><thead><tr><th>Time</th><th>Event</th><th>Cell</th><th>Detail</th></tr></thead><tbody id="evs"></tbody></table></div>
+</section>
+
+<section id="health">
+ <div class="warnbox">Health is an <b>indicator</b> (0–100) built from internal-resistance rise, voltage imbalance, temperature against the
+  other cells and gas-baseline drift. It is advisory: it never opens a relay. State of charge uses a placeholder voltage curve until the
+  25R curve is measured.</div>
+ <div class="grid" id="hcells"></div>
+ <div class="card" style="margin-top:12px"><h3>Internal resistance test</h3>
+  <p class="sub">Steps the load and measures each cell's resistance (ΔV/ΔI at 1 s). Runs only at Level 0 with the pack connected.</p>
+  <div class="row"><button class="b primary" data-cmd="irtest">Run IR test</button>
+   <button class="b" data-cmd="ir baseline">Save latest as baseline</button><span class="sub" id="irstate"></span></div></div>
+</section>
+
+<section id="control">
+ <div class="warnbox">Commands need the admin password (top right). No command can reset a Level 2/3 latch: use the physical
+  Reset button.</div>
+ <div class="grid">
+  <div class="card"><h3>System</h3><div class="row">
+   <button class="b" data-cmd="arm">Arm</button><button class="b" data-cmd="disarm">Disarm</button>
+   <button class="b" data-cmd="ack">Acknowledge</button><button class="b" data-cmd="relaycheck">Relay check</button></div>
+   <div class="sub" id="rcstate"></div></div>
+  <div class="card"><h3>Load</h3><div class="row">
+   <button class="b" data-cmd="load on">Load on</button><button class="b" data-cmd="load off">Load off</button>
+   <button class="b" data-cmd="profile 1">Scooter profile</button><button class="b" data-cmd="profile 0">Profile off</button></div></div>
+  <div class="card"><h3>Heater ramp test (dummy cell)</h3>
+   <div class="row"><label>Rate <input id="rr" type="number" value="2" min="0.2" max="10" step="0.1"> °C/min</label></div>
+   <div class="row"><label>Target <input id="rt" type="number" value="50" min="30" max="53" step="1"> °C</label></div>
+   <div class="row"><button class="b" id="rampgo">Start ramp</button><button class="b" data-cmd="heater off">Heater off</button></div>
+   <div class="small">The firmware still cuts at 55 °C and caps duty at 50 %; the KSD301 cuts at 70 °C.</div></div>
+  <div class="card"><h3>Demo: simulate a signal</h3>
+   <div class="row"><label>Cell <select id="sc"><option>1</option><option>2</option><option selected>3</option><option>4</option></select></label>
+    <button class="b" id="sgas">Gas</button><button class="b" id="stemp">Temperature</button><button class="b" data-cmd="sim off">Stop</button></div>
+   <div class="small">Injects a virtual signal for up to 120 s to demonstrate the vote. Flagged as SIMULATED; a resulting trip is real.</div></div>
+ </div>
+ <div class="card" style="margin-top:12px"><h3>Console</h3>
+  <div class="row"><input id="cmd" size="34" placeholder="e.g. probes, probe 1 2, calpt 1 3.702, calshow">
+   <button class="b" id="cmdgo">Send</button></div><pre id="reply">—</pre></div>
+ <div class="card" style="margin-top:12px"><h3>Firmware update</h3>
+  <form id="ota"><input type="file" id="otafile" accept=".bin"> <input type="submit" value="Upload"></form>
+  <div class="small">Refused while a cell is latched. The board reboots; every relay releases during the reboot.</div></div>
+</section>
+
+<section id="settings">
+ <div class="card"><h3>Self-test</h3><pre id="st">—</pre><button class="b" id="strun">Re-run self-test</button></div>
+ <div class="card" style="margin-top:12px"><h3>Thresholds and options</h3>
+  <p class="sub">Placeholder values until tuned on the rig. Limits from the design spec cannot be exceeded.</p>
+  <table><thead><tr><th>Setting</th><th>Value</th><th>Range</th></tr></thead><tbody id="cfg"></tbody></table>
+  <div class="row"><button class="b primary" id="cfgsave">Save changes</button><span class="sub" id="cfgmsg"></span></div></div>
+</section>
+</main>
+
+<script>
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const LEVEL=[["Normal","var(--good)","✓"],["Level 1 alert","var(--warn)","!"],["Level 2: cell isolated","var(--serious)","✕"],["Level 3: pack open","var(--crit)","✕"]];
+const ALERT={1:"Room gas (all cells rising together)",2:"Relay mismatch",4:"INA219 not answering",8:"BME280 not answering",16:"Heater cutoff reached",32:"Heater duty cap",64:"Not armed",128:"Sensor fault",256:"Cell undervoltage: load switched off (turn the load off and on to retry)"};
+const FAULT={1:"CO",2:"H2",4:"temperature",8:"tap"};
+const SIG=["gas","temperature","voltage"];
+const EV={1:"Signal on",2:"Signal off",3:"Level 2 trip",4:"Level 3 trip",5:"Reset",6:"Sensor fault",7:"Sensor fault cleared",8:"Alert",9:"Alert cleared",10:"Armed",11:"Disarmed",12:"Acknowledged",100:"Note"};
+const RC=["","Output live with every cell bypassed","Cell missing / tap out of range","Relay not switching or pack path open (E-stop?)","All-on voltage mismatch","No bus voltage"];
+const IRT=["idle","measuring","stepping","done","aborted"], IRR=["","alarm active","relays changed","load step changed no current","no current reading","no cell in string"];
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const COLS=()=>[css("--c1"),css("--c2"),css("--c3"),css("--c4")];
+const f=(x,d=2)=>(x===null||x===undefined||Number.isNaN(x))?"—":Number(x).toFixed(d);
+let S=null, H=[], lastT=-1, evNext=0, EVS=[];
+
+// ---------- admin key and theme (per-viewer conveniences only)
+try{$("#key").value=sessionStorage.getItem("vskey")||""}catch(e){}
+$("#key").addEventListener("change",()=>{try{sessionStorage.setItem("vskey",$("#key").value)}catch(e){}});
+try{const th=localStorage.getItem("vstheme");if(th)document.documentElement.dataset.theme=th}catch(e){}
+$("#theme").onclick=()=>{const r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==="dark":matchMedia("(prefers-color-scheme:dark)").matches;
+ r.dataset.theme=dark?"light":"dark";try{localStorage.setItem("vstheme",r.dataset.theme)}catch(e){};drawCharts()};
+
+async function api(p,opt={}){const h=Object.assign({"X-VS-Key":$("#key").value},opt.headers||{});
+ const r=await fetch(p,Object.assign({},opt,{headers:h}));if(!r.ok)throw new Error(r.status+" "+(await r.text()));return r}
+async function cmd(c){try{const t=await (await api("/api/cmd?c="+encodeURIComponent(c))).text();$("#reply").textContent=t;return t}
+ catch(e){$("#reply").textContent="Error: "+e.message+(String(e.message).startsWith("403")?" (admin password?)":"");}}
+
+// ---------- tabs
+$$("#tabs button").forEach(b=>b.onclick=()=>{$$("#tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));
+ $$("main section").forEach(s=>s.classList.toggle("on",s.id===b.dataset.t));if(b.dataset.t==="trends")drawCharts();
+ if(b.dataset.t==="settings"){loadCfg();loadSt()}if(b.dataset.t==="events")loadInc()});
+$$("[data-cmd]").forEach(b=>b.onclick=()=>cmd(b.dataset.cmd));
+{const tb=document.querySelector(`#tabs button[data-t="${location.hash.slice(1)}"]`);if(tb)setTimeout(()=>tb.click(),0)}
+$("#cmdgo").onclick=()=>cmd($("#cmd").value);$("#cmd").addEventListener("keydown",e=>{if(e.key==="Enter")cmd($("#cmd").value)});
+$("#rampgo").onclick=()=>cmd(`ramp ${$("#rr").value} ${$("#rt").value}`);
+$("#sgas").onclick=()=>cmd("sim gas "+$("#sc").value);$("#stemp").onclick=()=>cmd("sim temp "+$("#sc").value);
+
+// ---------- live
+function bits(v,map){return Object.keys(map).filter(b=>v&b).map(b=>map[b])}
+function render(){
+ const s=S,lv=LEVEL[s.level]||LEVEL[0];
+ $("#lvl").innerHTML=`<span class="dot" style="background:${lv[1]}"></span><span>${lv[2]} ${lv[0]}</span>`;
+ $("#arm").textContent=s.armed?"Armed":(s.relaycheck&&s.relaycheck.state===1?"Relay check running…":"Not armed");
+ $("#clock").textContent=`${s.time}  ·  fw ${s.fw}${s.mock?"  ·  MOCK sensors":""}`;
+ const ban=[];if(s.mock)ban.push("MOCK BUILD: sensor values are simulated, nothing is measured.");if(s.sim)ban.push("SIMULATED SIGNAL ACTIVE (demo injection).");
+ $("#banner").hidden=!ban.length;$("#banner").textContent=ban.join("  ");
+ const C=COLS();
+ $("#cells").innerHTML=s.cells.map((c,k)=>{const l=LEVEL[c.level]||LEVEL[0];
+  const sig=c.sig.map((a,i)=>a?SIG[i]:null).filter(Boolean).join(", ")||"none";
+  const fl=bits(c.faults,FAULT).join(", ");
+  return `<div class="card"><h3><span><span class="swatch" style="background:${C[k]}"></span>Cell ${k+1}${c.en?"":" (dummy/off)"}</span>
+   <span class="pill"><span class="dot" style="background:${l[1]}"></span>${l[2]} ${c.latched?"isolated":["normal","alert","isolated","pack open"][c.level]}</span></h3>
+   <div class="big">${f(c.v,3)} V</div><div class="kv">
+   <span>Temperature</span><span>${f(c.t,1)} °C</span><span>CO rise</span><span>${f(c.co*100,0)} %</span>
+   <span>H2 rise</span><span>${f(c.h2*100,0)} %</span><span>Relay</span><span>${c.relay?"in string":"bypassed"}</span>
+   <span>Active signals</span><span>${sig}</span>${fl?`<span>Sensor fault</span><span>${fl}</span>`:""}
+   ${c.trip_t>=0?`<span>Tripped at</span><span>${f(c.trip_t,1)} s (${c.order.filter(x=>x<3).map(x=>SIG[x]).join(" → ")})</span>`:""}</div></div>`}).join("");
+ const p=s.pack;
+ $("#pack").innerHTML=`<span>Relay</span><span>${p.relay?"closed":"open"}${p.latched?" (Level 3 latched)":""}</span><span>Voltage</span><span>${f(p.v,2)} V</span>
+  <span>Current</span><span>${f(p.i,3)} A</span><span>Power</span><span>${f(p.w,1)} W</span><span>Delivered</span><span>${f(p.ah*1000,0)} mAh · ${f(p.wh,2)} Wh</span>`;
+ const al=bits(s.alerts,ALERT);$("#alerts").innerHTML=al.length?al.map(a=>"• "+a).join("<br>"):"None";
+ $("#env").innerHTML=`<span>Room</span><span>${s.amb.ok?f(s.amb.t,1)+" °C · "+f(s.amb.rh,0)+" %RH":"—"}</span>
+  <span>Reference thermocouple</span><span>${s.tc===null?"—":f(s.tc,2)+" °C"}</span>
+  <span>Heater</span><span>${s.heater.on?"ON":"off"} (${s.heater.mode}, duty ${f(s.heater.duty*100,0)} %)</span>
+  <span>Load</span><span>${s.load.on?"ON":"off"}${s.load.profile?" (scooter profile)":""}</span>`;
+ const rc=s.relaycheck;$("#rcstate").textContent=rc?["Relay check: not run","Relay check running…","Relay check PASSED",
+  "Relay check FAILED: "+(RC[rc.code]||"")+(rc.cell>=0?` (cell ${rc.cell+1})`:"")+(rc.code>=3?`, measured ${f(rc.meas,2)} V vs ${f(rc.exp,2)} V`:"")][rc.state]:"";
+ $("#hcells").innerHTML=s.cells.map((c,k)=>`<div class="card"><h3><span><span class="swatch" style="background:${C[k]}"></span>Cell ${k+1}</span></h3>
+  <div class="big">${c.score===null?"—":f(c.score,0)}<span class="sub"> / 100</span></div><div class="kv">
+  <span>State of charge</span><span>${c.soc===null?"—":f(c.soc*100,0)+" %"}</span><span>Discharged</span><span>${f(c.ah*1000,0)} mAh</span>
+  <span>Internal resistance</span><span>${c.ir>0?f(c.ir*1000,1)+" mΩ":"—"}</span><span>Baseline</span><span>${c.ir_base>0?f(c.ir_base*1000,1)+" mΩ":"—"}</span></div></div>`).join("");
+ const it=s.irtest;$("#irstate").textContent=`IR test: ${IRT[it.state]||""}${it.state===4?" ("+IRR[it.reason]+")":""}${it.state===3?`, ΔI ${f(it.di,2)} A`:""}`;
+}
+
+// ---------- charts: thin 2px lines, legend + direct end labels, crosshair tooltip
+const CH={cT:{cols:[7,8,9,10],unit:"°C",d:1,th:[50]},cG:{cols:[11,12,13,14],unit:"%",d:0,scale:100,th:[30]},
+          cV:{cols:[3,4,5,6],unit:"V",d:3},cI:{cols:[15],unit:"A",d:3,single:true}};
+function drawCharts(){if(!$("#trends").classList.contains("on"))return;for(const id in CH)drawChart(id)}
+function drawChart(id){
+ const cv=$("#"+id),cfg=CH[id],dpr=devicePixelRatio||1,W=cv.clientWidth,Hh=cv.clientHeight;
+ cv.width=W*dpr;cv.height=Hh*dpr;const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,Hh);
+ const C=cfg.single?[css("--ink")]:COLS(),L={l:48,r:62,t:8,b:22},pw=W-L.l-L.r,ph=Hh-L.t-L.b;
+ if(!H.length){g.fillStyle=css("--ink2");g.fillText("Waiting for data…",L.l,L.t+20);return}
+ const sc=cfg.scale||1,ser=cfg.cols.map(c=>H.map(r=>[r[0],r[c]===null?NaN:r[c]*sc]));
+ let lo=Infinity,hi=-Infinity;ser.forEach(s=>s.forEach(p=>{if(!isNaN(p[1])){lo=Math.min(lo,p[1]);hi=Math.max(hi,p[1])}}));
+ (cfg.th||[]).forEach(v=>{hi=Math.max(hi,v*1.05)});if(!isFinite(lo)){lo=0;hi=1}if(hi-lo<1e-6){hi+=0.5;lo-=0.5}
+ const pad=(hi-lo)*0.08;lo-=pad;hi+=pad;const t0=H[0][0],t1=Math.max(H[H.length-1][0],t0+1);
+ const X=t=>L.l+(t-t0)/(t1-t0)*pw,Y=v=>L.t+(1-(v-lo)/(hi-lo))*ph;
+ g.strokeStyle=css("--line");g.lineWidth=1;g.fillStyle=css("--ink2");g.font="11px system-ui,sans-serif";
+ for(let i=0;i<=4;i++){const v=lo+(hi-lo)*i/4,y=Y(v);g.beginPath();g.moveTo(L.l,y);g.lineTo(L.l+pw,y);g.stroke();g.fillText(v.toFixed(cfg.d>1?2:cfg.d),4,y+4)}
+ for(let i=0;i<=4;i++){const t=t0+(t1-t0)*i/4;g.fillText(Math.round(t-t1)+" s",X(t)-12,Hh-6)}
+ (cfg.th||[]).forEach(v=>{g.setLineDash([4,4]);g.strokeStyle=css("--muted");g.beginPath();g.moveTo(L.l,Y(v));g.lineTo(L.l+pw,Y(v));g.stroke();g.setLineDash([]);
+  g.fillStyle=css("--ink2");g.fillText("threshold "+v+" "+cfg.unit+" (placeholder)",L.l+4,Y(v)-4)});
+ g.lineWidth=2;g.lineJoin="round";
+ ser.forEach((s,k)=>{g.strokeStyle=C[k];g.beginPath();let pen=false;s.forEach(p=>{if(isNaN(p[1])){pen=false;return}
+  pen?g.lineTo(X(p[0]),Y(p[1])):g.moveTo(X(p[0]),Y(p[1]));pen=true});g.stroke()});
+ if(!cfg.single){const ends=ser.map((s,k)=>{for(let i=s.length-1;i>=0;i--)if(!isNaN(s[i][1]))return[Y(s[i][1]),k];return null}).filter(Boolean).sort((a,b)=>a[0]-b[0]);
+  for(let i=1;i<ends.length;i++)if(ends[i][0]-ends[i-1][0]<13)ends[i][0]=ends[i-1][0]+13;
+  for(let i=ends.length-1;i>=0;i--)ends[i][0]=Math.min(ends[i][0],i===ends.length-1?L.t+ph-4:ends[i+1][0]-13);
+  g.fillStyle=css("--ink2");ends.forEach(([y,k])=>g.fillText("Cell "+(k+1),L.l+pw+6,y+4));
+  const lg=document.querySelector(`.legend[data-for="${id}"]`);if(lg)lg.innerHTML=C.map((c,k)=>`<span><span class="swatch" style="background:${c}"></span>Cell ${k+1}</span>`).join("")}
+ cv._m={X,Y,t0,t1,L,pw,ser,cfg,C};
+}
+$$(".chart canvas").forEach(cv=>{const tip=cv.parentElement.querySelector(".tip");
+ cv.addEventListener("mousemove",e=>{const m=cv._m;if(!m||!H.length)return;const r=cv.getBoundingClientRect(),x=e.clientX-r.left;
+  const t=m.t0+(x-m.L.l)/m.pw*(m.t1-m.t0);let i=0,best=1e9;H.forEach((row,j)=>{const d=Math.abs(row[0]-t);if(d<best){best=d;i=j}});
+  drawChart(cv.id);const g=cv.getContext("2d"),xx=m.X(H[i][0]);g.strokeStyle=css("--muted");g.lineWidth=1;g.beginPath();g.moveTo(xx,m.L.t);g.lineTo(xx,m.L.t+cv.clientHeight-m.L.t-m.L.b);g.stroke();
+  tip.innerHTML=`<b>${Math.round(H[i][0]-m.t1)} s</b><br>`+m.ser.map((s,k)=>`<span class="swatch" style="background:${m.C[k]}"></span>${m.cfg.single?"Pack":"Cell "+(k+1)}: ${f(s[i][1],m.cfg.d)} ${m.cfg.unit}`).join("<br>");
+  tip.style.display="block";tip.style.left=Math.min(x+12,cv.clientWidth-150)+"px";tip.style.top="8px"});
+ cv.addEventListener("mouseleave",()=>{tip.style.display="none";drawChart(cv.id)})});
+addEventListener("resize",drawCharts);
+
+// ---------- events, incidents, settings, self-test
+function evText(e){if(e.type===100)return[e.text||"",""];let d="";if(e.type===1||e.type===2)d=SIG[e.detail]||"";
+ else if(e.type===3)d=SIG.filter((_,i)=>e.detail&(1<<i)).join(" + ");else if(e.type===4)d="cells "+[0,1,2,3].filter(i=>e.detail&(1<<i)).map(i=>i+1).join(", ");
+ else if(e.type===6||e.type===7)d=FAULT[e.detail]||"";else if(e.type===8||e.type===9)d=ALERT[e.detail]||"";return[EV[e.type]||e.type,d]}
+function renderEvents(){$("#evs").innerHTML=EVS.slice(-200).reverse().map(e=>{const[n,d]=evText(e);
+ return `<tr><td>${e.time}</td><td>${n}</td><td>${e.cell>=0?e.cell+1:""}</td><td>${d}</td></tr>`}).join("")}
+async function loadInc(){try{const j=await (await api("/api/incidents")).json();$("#sdstate").textContent=j.sd?"":"(no microSD card)";
+ $("#incs").innerHTML=j.items.length?j.items.map(i=>`<div><a href="/api/file?name=${encodeURIComponent(i.name)}">${i.name}</a> <span class="small">${(i.size/1024).toFixed(1)} kB</span></div>`).join(""):"None";
+ if(j.last)$("#lastinc").innerHTML=`<b>${j.last.time}</b>: Level ${j.last.level}, cell ${j.last.cell+1}, signals ${SIG.filter((_,i)=>j.last.mask&(1<<i)).join(" + ")}`}catch(e){}}
+async function loadCfg(){try{const j=await (await api("/api/config")).json();$("#cfg").innerHTML=Object.entries(j.settings).map(([k,v])=>
+ `<tr><td>${v.label}<div class="small">${k}</div></td><td><input type="number" data-k="${k}" value="${v.v}" min="${v.min}" max="${v.max}" step="any" data-o="${v.v}"> ${v.unit}</td><td class="small">${v.min} – ${v.max}</td></tr>`).join("")}catch(e){}}
+$("#cfgsave").onclick=async()=>{const ch=$$("#cfg input").filter(i=>i.value!==i.dataset.o);if(!ch.length){$("#cfgmsg").textContent="No changes.";return}
+ const body=new URLSearchParams();ch.forEach(i=>body.append(i.dataset.k,i.value));
+ try{const j=await (await api("/api/config",{method:"POST",body})).json();$("#cfgmsg").textContent=j.ok?"Saved.":"Rejected: "+j.err;loadCfg()}
+ catch(e){$("#cfgmsg").textContent="Error: "+e.message}};
+async function loadSt(){try{const j=await (await api("/api/selftest")).json();$("#st").textContent=j.report}catch(e){}}
+$("#strun").onclick=loadSt;
+$("#ota").onsubmit=async e=>{e.preventDefault();const fl=$("#otafile").files[0];if(!fl)return;const fd=new FormData();fd.append("firmware",fl);
+ try{const t=await (await api("/update?key="+encodeURIComponent($("#key").value),{method:"POST",body:fd})).text();$("#reply").textContent=t}
+ catch(err){$("#reply").textContent="Update error: "+err.message}};
+
+// ---------- polling
+async function poll(){try{S=await (await api("/api/state")).json();render()}catch(e){$("#clock").textContent="connection lost, retrying…"}}
+async function pollH(){try{const j=await (await api("/api/history?since="+lastT)).json();if(j.rows.length){H=H.concat(j.rows);if(H.length>600)H=H.slice(-600);lastT=H[H.length-1][0];drawCharts()}}catch(e){}}
+async function pollE(){try{const j=await (await api("/api/events?since="+evNext)).json();if(j.events.length){EVS=EVS.concat(j.events);evNext=j.next;renderEvents()}}catch(e){}}
+poll();pollH();pollE();setInterval(poll,1000);setInterval(pollH,2000);setInterval(pollE,2000);
+</script>
+</body>
+</html>

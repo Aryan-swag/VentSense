@@ -5,7 +5,7 @@ the plant, sensors and fault profiles are models with ASSUMED values (`sim/param
 These results show the firmware logic and timing behave as designed against modelled faults.
 They do not prove detection on real cells. Thresholds are placeholders to be tuned on the rig.
 
-## Scenario checks: 29 / 29 passed
+## Scenario checks: 35 / 35 passed
 
 | Scenario | Check | Result | Detail |
 |---|---|---|---|
@@ -35,6 +35,12 @@ They do not prove detection on real cells. Thresholds are placeholders to be tun
 | rig_vote | dummy segment 1 trips Level 2 (H2 + temperature) | PASS | trips {0: 357.29998779296875} |
 | rig_vote | real cells untouched | PASS |  |
 | rig_vote | heater off after the trip | PASS |  |
+| ir_health | no Level 2 trip | PASS | trips: {} |
+| ir_health | no Level 3 trip | PASS |  |
+| ir_health | commissioning test: every cell within 10 % of the model | PASS | worst error 2.0 % |
+| ir_health | after ageing: every cell within 10 % of the model | PASS | worst error 1.1 % |
+| ir_health | aged cell 2 measured about 1.8x its baseline | PASS | ratio 1.77 |
+| ir_health | health indicator flags cell 2 only | PASS | scores 98, 61, 98, 97 |
 | late_second | no Level 2 trip | PASS | trips: {} |
 | late_second | no Level 3 trip | PASS |  |
 | late_second | reached Level 1 only | PASS | max level 1 |
@@ -54,4 +60,4 @@ Plots: `out/<scenario>.png`.
 
 Detection time depends entirely on the ASSUMED fault profile; quote it only as a model result.
 
-Run time: 66 s.
+Run time: 89 s.

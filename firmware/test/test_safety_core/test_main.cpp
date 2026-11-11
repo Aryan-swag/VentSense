@@ -354,6 +354,25 @@ void test_disabled_dummy_segment_never_energised() {
     TEST_ASSERT_EQUAL_UINT8(VS_LEVEL_NORMAL, b.out.level);
 }
 
+void test_undervoltage_switches_load_off_until_released() {
+    Bench b;
+    b.run(30);
+    TEST_ASSERT_EQUAL_UINT8(1, b.out.load_on);
+    b.cell_ocv[2] = 2.95f;  // below 3.0 V
+    b.run(1);
+    TEST_ASSERT_EQUAL_UINT8(0, b.out.load_on);
+    TEST_ASSERT_TRUE(b.out.alerts & VS_ALERT_UNDERVOLT);
+    TEST_ASSERT_EQUAL_UINT8(VS_LEVEL_1, b.out.level);
+    b.cell_ocv[2] = 3.30f;  // recovers at rest: still off until the operator releases the request
+    b.run(2);
+    TEST_ASSERT_EQUAL_UINT8(0, b.out.load_on);
+    b.in.load_request = 0;
+    b.run(0.5f);
+    b.in.load_request = 1;
+    b.run(0.5f);
+    TEST_ASSERT_EQUAL_UINT8(1, b.out.load_on);
+}
+
 void test_ir_estimator() {
     const float vr[4] = {3.80f, 3.80f, 3.80f, 3.80f};
     const float vl[4] = {3.76f, 3.75f, 3.76f, 3.70f};
@@ -387,6 +406,7 @@ int main() {
     RUN_TEST(test_heater_duty_limited_to_half);
     RUN_TEST(test_heater_off_when_any_cell_latched);
     RUN_TEST(test_disabled_dummy_segment_never_energised);
+    RUN_TEST(test_undervoltage_switches_load_off_until_released);
     RUN_TEST(test_ir_estimator);
     return UNITY_END();
 }

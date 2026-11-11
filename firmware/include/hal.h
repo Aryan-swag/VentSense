@@ -5,6 +5,7 @@
 // [comms] only from the comms task (core 0). The real HAL guards the shared I2C bus with a mutex.
 #pragma once
 #include <stddef.h>
+#include <stdint.h>
 
 #include "safety_core.h"
 
@@ -32,5 +33,7 @@ bool hal_log_begin();                   // microSD; false if no card            
 void hal_log(const char *line);         // append one CSV line to today's log                 [comms]
 void hal_log_flush();                   //                                                    [comms]
 void hal_timestamp(char *buf, size_t n);  // "2026-11-12 14:32:05" from the DS3231, else uptime [comms]
+void hal_rtc_set(uint32_t unix_local);    // set the DS3231 (local time) after a network time sync    [comms]
+bool hal_sd_ready();                      // microSD mounted (incident files, downloads)               [comms]
 // Console / dashboard commands. Mock: fault injection. Real: probe mapping, calibration.  [comms]
 void hal_command(const char *cmd, char *reply, size_t n);

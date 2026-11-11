@@ -4,7 +4,7 @@ import math
 import random
 
 import params as P
-from vs_core import SafetyCore, SIG_NAMES
+from vs_core import SafetyCore, Health, IrTest, SIG_NAMES
 
 
 def ocv(soc):
@@ -17,7 +17,7 @@ def ocv(soc):
 class Scenario:
     def __init__(self, name, title, duration, load=lambda t: True, faults=(), room_co=lambda t: 0.0,
                  room_h2=lambda t: 0.0, local_gas=(), unplug=(), heater=None, dummy=None, resets=(), tweak=None,
-                 expect=None):
+                 expect=None, ir_tests=(), r0_change=()):
         self.name, self.title, self.duration = name, title, duration
         self.load, self.faults = load, list(faults)  # faults: (cell, onset_s, ramp_s, scale)
         self.room_co, self.room_h2 = room_co, room_h2
@@ -28,6 +28,8 @@ class Scenario:
         self.resets = list(resets)
         self.tweak = tweak
         self.expect = expect  # f(result) -> [(check, passed, detail)]
+        self.ir_tests = list(ir_tests)    # times at which the firmware runs the internal-resistance test
+        self.r0_change = list(r0_change)  # (cell, t, factor): synthetic accelerated ageing step
 
 
 class Twin:
@@ -72,6 +74,14 @@ class Twin:
         self.heater_act = 0
         self.load_act = 0
         self.debounce = self.core.cfg.debounce_s
+        self.r0_nominal = list(self.r0)
+        self.health, self.irt = Health(), IrTest()
+        self.ir_base = [0.0] * n
+        self.ir_now = [0.0] * n
+        self.ir_results = []  # (t, [ohm per cell], [model ohm per cell])
+        self.user_load = None  # dash server: None = scenario load pattern, else forced on/off
+        self.ack_until = -1.0
+        self.t = 0.0
 
     def severity(self, k, t):
         s = 0.0
@@ -81,13 +91,25 @@ class Twin:
         return s
 
     def run(self):
+        for _ in self.iter_steps():
+            pass
+        return self.summarise(self.rec, self.events)
+
+    def iter_steps(self, n_steps=None):
+        """advance the plant + firmware one 100 ms step per iteration; n_steps=-1 runs forever (dash server)"""
         sc, rng, core, n, dt = self.sc, self.rng, self.core, P.N, P.DT
-        rec = {k: [] for k in ('t', 'gas', 'temp', 'temp_true', 'cell_v', 'current', 'level', 'seg', 'pack',
-                               'heater', 'block', 'duty', 'ksd')}
-        events = []
-        steps = int(round(sc.duration / dt))
-        for i in range(steps):
+        self.rec = rec = {k: [] for k in ('t', 'gas', 'temp', 'temp_true', 'cell_v', 'current', 'level', 'seg', 'pack',
+                               'heater', 'block', 'duty', 'ksd', 'score', 'soc')}
+        self.events = events = []
+        steps = int(round(sc.duration / dt)) if n_steps is None else n_steps
+        i = -1
+        while steps < 0 or i + 1 < steps:
+            i += 1
+            self.t = (i + 1) * dt
             t = (i + 1) * dt
+            for cell, tc, factor in sc.r0_change:
+                if abs(t - tc) < dt / 2:
+                    self.r0[cell] = self.r0_nominal[cell] * factor
             # ---------------- electrical
             in_str = [self.seg_act[k] and self.real[k] for k in range(n)]
             oc = [ocv(self.soc[k]) if self.real[k] else 0.0 for k in range(n)]
@@ -184,13 +206,51 @@ class Twin:
             inp.ambient_rh = 50.0
             inp.current_ok = inp.bus_ok = inp.ambient_ok = 1
             inp.armed = 1
-            inp.load_request = 1 if sc.load(t) else 0
+            inp.load_request = (1 if sc.load(t) else 0) if self.user_load is None else int(self.user_load)
             inp.heater_request = 1 if (sc.heater and sc.heater[0] <= t < sc.heater[1]) else 0
             inp.reset_pressed = 1 if any(tr <= t < tr + 0.3 for tr in sc.resets) else 0
-            inp.ack_pressed = 0
+            inp.ack_pressed = 1 if t < self.ack_until else 0
+            # ---------------- internal-resistance test (firmware sequence), overrides the load request
+            prev = core.out
+            ii = self.irt.inp
+            ii.t_s = t
+            for k in range(n):
+                ii.cell_v[k] = prev.cell_v[k] if prev.cell_v[k] == prev.cell_v[k] else 0.0
+                ii.in_string[k] = prev.in_string[k]
+            ii.pack_current_a, ii.current_ok = inp.pack_current_a, 1
+            ii.level, ii.load_on_now = prev.level, prev.load_on
+            ii.start = 1 if any(ts <= t < ts + dt for ts in sc.ir_tests) else 0
+            self.irt.step()
+            io = self.irt.out
+            if io.load_override >= 0:
+                inp.load_request = io.load_override
+            if io.result_new:
+                r = [io.r_ohm[k] for k in range(n)]
+                self.ir_results.append((t, r, [self.r0[k] + P.R1 * (1 - math.exp(-1.0 / P.TAU_RC)) for k in range(n)]))
+                if not any(self.ir_base):  # first measurement = commissioning baseline, also used for sag compensation
+                    self.ir_base = [x if x == x else 0.0 for x in r]
+                    for k in range(n):
+                        core.cfg.ir_ohm[k] = self.ir_base[k]
+                    core.set_config()
+                self.ir_now = [x if x == x else 0.0 for x in r]
             for e in core.step():
                 events.append(e)
             out = core.out
+            # ---------------- health indicator (advisory)
+            hi = self.health.inp
+            hi.t_s = t
+            for k in range(n):
+                hi.cell_v[k] = out.cell_v[k]
+                hi.in_string[k] = out.in_string[k]
+                hi.temp_ok[k] = inp.cell[k].temp_ok
+                hi.temp_c[k] = inp.cell[k].temp_c
+                hi.gas_base_co[k] = out.gas_base_co[k]
+                hi.gas_base_h2[k] = out.gas_base_h2[k]
+                hi.ir_now[k] = self.ir_now[k]
+                hi.ir_base[k] = self.ir_base[k]
+            hi.pack_current_a, hi.pack_bus_v, hi.current_ok = inp.pack_current_a, inp.pack_bus_v, 1
+            hi.gas_warm = 1 if t >= core.cfg.gas_warmup_s else 0
+            self.health.step()
             # ---------------- actuators follow at the next step (relay operate time < one step)
             self.seg_act = [out.seg_relay_on[k] for k in range(n)]
             self.pack_act = out.pack_relay_on
@@ -210,7 +270,10 @@ class Twin:
             rec['block'].append(self.Tb)
             rec['duty'].append(out.heater_duty)
             rec['ksd'].append(1 if self.ksd_closed else 0)
-        return self.summarise(rec, events)
+            ho = self.health.out
+            rec['score'].append([ho.score[k] for k in range(n)])
+            rec['soc'].append([ho.soc[k] for k in range(n)])
+            yield t
 
     def summarise(self, rec, events):
         trips = {e[2]: e[0] for e in events if e[1] == 'L2_TRIP'}
@@ -223,6 +286,8 @@ class Twin:
                 raw2 = ons[-1] - self.debounce
                 latency[k] = (tt + P.DT) - raw2  # relay physically switched at the next step
         order = {k: [SIG_NAMES[s] for s in range(3) if (trip_mask[k] >> s) & 1] for k in trips}
+        ho = self.health.out
         return dict(rec=rec, events=events, trips=trips, trip_signals=order, l3=l3, latency=latency,
+                    ir_results=self.ir_results, pack_wh=ho.pack_wh, pack_ah=ho.pack_ah,
                     alerts_seen=sorted({e[3] for e in events if e[1] == 'ALERT_ON'}),
                     max_level=max(rec['level']) if rec['level'] else 0)

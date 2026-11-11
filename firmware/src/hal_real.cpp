@@ -366,6 +366,16 @@ void hal_timestamp(char *buf, size_t n) {
     snprintf(buf, n, "uptime %lu s", (unsigned long)(millis() / 1000));
 }
 
+void hal_rtc_set(uint32_t unix_local) {
+    if (!rtc_ok) return;
+    I2cLock l;
+    if (!l.ok) return;
+    rtc.adjust(DateTime(unix_local));
+    rtc_lost = false;
+}
+
+bool hal_sd_ready() { return sd_ok; }
+
 bool hal_log_begin() {
     sd_ok = SD.begin(PIN_SD_CS, SPI, 4000000);
     if (!sd_ok) return false;

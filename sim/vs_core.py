@@ -8,7 +8,8 @@ import os
 import subprocess
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SRC = os.path.join(HERE, '..', 'firmware', 'lib', 'safety_core', 'src', 'safety_core.cpp')
+SRC_DIR = os.path.join(HERE, '..', 'firmware', 'lib', 'safety_core', 'src')
+SRCS = [os.path.join(SRC_DIR, f) for f in ('safety_core.cpp', 'health.cpp', 'sequences.cpp', 'config_table.cpp')]
 LIB = os.path.join(HERE, 'build', 'libvscore.so')
 N, NS = 4, 3
 f32, i32, u8, u32 = C.c_float, C.c_int32, C.c_uint8, C.c_uint32
@@ -30,7 +31,7 @@ class Config(C.Structure):
         ('gas_fault_low_v', f32), ('gas_fault_high_v', f32), ('gas_slope_tau_s', f32),
         ('temp_abs_c', f32), ('temp_above_ambient_c', f32), ('temp_above_neighbors_c', f32),
         ('temp_rate_c_per_min', f32), ('temp_slope_tau_s', f32), ('temp_valid_min_c', f32), ('temp_valid_max_c', f32),
-        ('volt_sag_v', f32), ('ir_ohm', f32 * N), ('cell_v_min_valid', f32), ('segment_enabled', i32 * N),
+        ('volt_sag_v', f32), ('ir_ohm', f32 * N), ('cell_v_min_valid', f32), ('segment_enabled', i32 * N), ('cell_uv_v', f32),
         ('relay_settle_s', f32), ('relay_check_tol_v', f32), ('path_r_ohm', f32),
         ('heater_cell', i32), ('heater_cutoff_c', f32), ('heater_rearm_c', f32), ('heater_max_duty', f32),
         ('heater_duty_tau_s', f32)]
@@ -52,7 +53,35 @@ class Outputs(C.Structure):
                 ('level', u8), ('cell_level', u8 * N), ('cell_latched', u8 * N), ('pack_latched', u8),
                 ('sig_active', (u8 * NS) * N), ('cell_faults', u8 * N), ('trip_order', (u8 * NS) * N), ('alerts', u32),
                 ('cell_v', f32 * N), ('gas_rise_co', f32 * N), ('gas_rise_h2', f32 * N), ('temp_rate_c_per_min', f32 * N),
-                ('volt_dev_v', f32 * N), ('trip_time_s', f32 * N), ('pack_trip_time_s', f32), ('heater_duty', f32)]
+                ('volt_dev_v', f32 * N), ('trip_time_s', f32 * N), ('pack_trip_time_s', f32), ('heater_duty', f32),
+                ('gas_base_co', f32 * N), ('gas_base_h2', f32 * N), ('in_string', u8 * N), ('pad_', u8 * 4)]
+
+
+class HealthCfg(C.Structure):
+    _fields_ = [('capacity_ah', f32), ('ocv_table', f32 * 11), ('rest_current_a', f32), ('rest_time_s', f32),
+                ('ir_ratio_span', f32), ('imbalance_span_v', f32), ('temp_span_c', f32), ('gas_drift_span', f32),
+                ('w_ir', f32), ('w_imb', f32), ('w_temp', f32), ('w_gas', f32)]
+
+
+class HealthIn(C.Structure):
+    _fields_ = [('t_s', f32), ('cell_v', f32 * N), ('in_string', u8 * N), ('temp_ok', u8 * N), ('temp_c', f32 * N),
+                ('pack_current_a', f32), ('pack_bus_v', f32), ('current_ok', u8), ('gas_warm', u8), ('pad_', u8 * 2),
+                ('gas_base_co', f32 * N), ('gas_base_h2', f32 * N), ('ir_now', f32 * N), ('ir_base', f32 * N)]
+
+
+class HealthOut(C.Structure):
+    _fields_ = [('soc', f32 * N), ('ah_out', f32 * N), ('pack_ah', f32), ('pack_wh', f32), ('score', f32 * N),
+                ('sub_ir', f32 * N), ('sub_imb', f32 * N), ('sub_temp', f32 * N), ('sub_gas', f32 * N)]
+
+
+class IrIn(C.Structure):
+    _fields_ = [('t_s', f32), ('cell_v', f32 * N), ('in_string', u8 * N), ('pack_current_a', f32), ('current_ok', u8),
+                ('level', u8), ('load_on_now', u8), ('start', u8)]
+
+
+class IrOut(C.Structure):
+    _fields_ = [('load_override', C.c_int8), ('state', u8), ('result_new', u8), ('abort_reason', u8),
+                ('r_ohm', f32 * N), ('di_a', f32)]
 
 
 class Event(C.Structure):
@@ -62,8 +91,9 @@ class Event(C.Structure):
 def build(force=False):
     """Compile the firmware safety core into a shared library (same source the ESP32 uses)."""
     os.makedirs(os.path.dirname(LIB), exist_ok=True)
-    if force or not os.path.exists(LIB) or os.path.getmtime(LIB) < os.path.getmtime(SRC):
-        subprocess.check_call(['g++', '-std=gnu++17', '-O2', '-shared', '-fPIC', '-Wall', SRC, '-o', LIB])
+    newest = max(os.path.getmtime(f) for f in SRCS + [os.path.join(SRC_DIR, h) for h in os.listdir(SRC_DIR)])
+    if force or not os.path.exists(LIB) or os.path.getmtime(LIB) < newest:
+        subprocess.check_call(['g++', '-std=gnu++17', '-O2', '-shared', '-fPIC', '-Wall'] + SRCS + ['-o', LIB])
     return LIB
 
 
@@ -81,7 +111,20 @@ def load():
         _lib.vs_pop_event.argtypes = [C.c_void_p, C.POINTER(Event)]
         _lib.vs_pop_event.restype = C.c_int
         _lib.vs_default_config.argtypes = [C.POINTER(Config)]
-        for name, st in (('config', Config), ('inputs', Inputs), ('outputs', Outputs), ('event', Event)):
+        _lib.vs_set_config.argtypes = [C.c_void_p, C.POINTER(Config)]
+        _lib.vs_config_json.argtypes = [C.POINTER(Config), C.c_char_p, C.c_size_t]
+        _lib.vs_config_json.restype = C.c_size_t
+        _lib.vs_config_set.argtypes = [C.POINTER(Config), C.c_char_p, C.c_float, C.c_char_p, C.c_size_t]
+        _lib.vs_config_set.restype = C.c_int
+        for fn_name in ('vs_health_create', 'vs_irtest_create'):
+            getattr(_lib, fn_name).restype = C.c_void_p
+        _lib.vs_health_create.argtypes = [C.c_void_p]
+        _lib.vs_irtest_create.argtypes = [C.c_void_p]
+        _lib.vs_health_step.argtypes = [C.c_void_p, C.POINTER(HealthIn), C.POINTER(HealthOut)]
+        _lib.vs_irtest_step.argtypes = [C.c_void_p, C.POINTER(IrIn), C.POINTER(IrOut)]
+        for name, st in (('config', Config), ('inputs', Inputs), ('outputs', Outputs), ('event', Event),
+                         ('health_config', HealthCfg), ('health_in', HealthIn), ('health_out', HealthOut),
+                         ('irtest_in', IrIn), ('irtest_out', IrOut)):
             fn = getattr(_lib, 'vs_sizeof_' + name)
             fn.restype = C.c_size_t
             if fn() != C.sizeof(st):
@@ -99,6 +142,22 @@ class SafetyCore:
         self.h = lib.vs_create(C.byref(self.cfg))
         self.inp, self.out, self._ev = Inputs(), Outputs(), Event()
 
+    def set_config(self):
+        _lib.vs_set_config(self.h, C.byref(self.cfg))
+
+    def config_json(self):
+        buf = C.create_string_buffer(8192)
+        _lib.vs_config_json(C.byref(self.cfg), buf, 8192)
+        return buf.value.decode()
+
+    def config_set(self, key, value):
+        """range-checked by the firmware's own settings table; returns '' or the reason it was rejected"""
+        err = C.create_string_buffer(160)
+        ok = _lib.vs_config_set(C.byref(self.cfg), key.encode(), float(value), err, 160)
+        if ok:
+            self.set_config()
+        return '' if ok else err.value.decode()
+
     def step(self):
         _lib.vs_step(self.h, C.byref(self.inp), C.byref(self.out))
         evs = []
@@ -112,3 +171,25 @@ class SafetyCore:
             _lib.vs_destroy(self.h)
         except Exception:
             pass
+
+
+class Health:
+    """health.cpp: charge/energy, state of charge, health indicator (advisory only)"""
+    def __init__(self):
+        load()
+        self.h = _lib.vs_health_create(None)
+        self.inp, self.out = HealthIn(), HealthOut()
+
+    def step(self):
+        _lib.vs_health_step(self.h, C.byref(self.inp), C.byref(self.out))
+
+
+class IrTest:
+    """sequences.cpp: internal resistance per cell from a load step (DCIR at 1 s)"""
+    def __init__(self):
+        load()
+        self.h = _lib.vs_irtest_create(None)
+        self.inp, self.out = IrIn(), IrOut()
+
+    def step(self):
+        _lib.vs_irtest_step(self.h, C.byref(self.inp), C.byref(self.out))

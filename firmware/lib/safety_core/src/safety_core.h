@@ -48,7 +48,8 @@ enum {
     VS_ALERT_HEATER_CUTOFF = 1u << 4,  /* heater cell reached the cutoff (info, no level change) */
     VS_ALERT_HEATER_DUTY = 1u << 5,    /* heater held off by the duty cap (info)                 */
     VS_ALERT_NOT_ARMED = 1u << 6,      /* self-test not passed / not armed: all relays off (info)*/
-    VS_ALERT_SENSOR_FAULT = 1u << 7    /* at least one per-cell sensor fault                     */
+    VS_ALERT_SENSOR_FAULT = 1u << 7,   /* at least one per-cell sensor fault                     */
+    VS_ALERT_UNDERVOLT = 1u << 8       /* a cell fell below cell_uv_v: load switched off          */
 };
 
 /* event types (vs_event_t.type) */
@@ -103,6 +104,7 @@ typedef struct {
     float ir_ohm[VS_NCELL];       /* measured internal resistance per cell, 0 = unknown          */
     float cell_v_min_valid;       /* computed in-string cell voltage below this = relay/tap fault*/
     int32_t segment_enabled[VS_NCELL]; /* 0 = segment never energised (e.g. dummy cell in a test)*/
+    float cell_uv_v;              /* undervoltage: below this the load is switched off (over-discharge) */
 
     /* relay verification */
     float relay_settle_s;         /* ignore voltage checks this long after a relay change        */
@@ -165,6 +167,10 @@ typedef struct {
     float trip_time_s[VS_NCELL]; /* time of the Level 2 latch, -1 = none */
     float pack_trip_time_s;      /* time of the Level 3 latch, -1 = none */
     float heater_duty;
+    float gas_base_co[VS_NCELL]; /* current gas baselines (ADS volts), for health / dashboard */
+    float gas_base_h2[VS_NCELL];
+    uint8_t in_string[VS_NCELL]; /* relay on, settled and segment enabled (voltage valid under load) */
+    uint8_t pad_[4];
 } vs_outputs_t;
 
 typedef struct {

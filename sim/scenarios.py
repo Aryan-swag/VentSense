@@ -75,6 +75,23 @@ def exp_late(r):
     return no_trip(r) + [('reached Level 1 only', r['max_level'] == 1, 'max level %d' % r['max_level'])]
 
 
+def exp_ir(r):
+    res = r['ir_results']
+    if len(res) < 2:
+        return [('two internal-resistance tests completed', False, '%d results' % len(res))]
+    (t1, m1, true1), (t2, m2, true2) = res[0], res[1]
+    err1 = max(abs(m1[k] - true1[k]) / true1[k] for k in range(4))
+    err2 = max(abs(m2[k] - true2[k]) / true2[k] for k in range(4))
+    ratio = m2[1] / m1[1]
+    score = r['rec']['score'][-1]
+    return no_trip(r) + [
+        ('commissioning test: every cell within 10 % of the model', err1 < 0.10, 'worst error %.1f %%' % (100 * err1)),
+        ('after ageing: every cell within 10 % of the model', err2 < 0.10, 'worst error %.1f %%' % (100 * err2)),
+        ('aged cell 2 measured about 1.8x its baseline', 1.6 < ratio < 2.0, 'ratio %.2f' % ratio),
+        ('health indicator flags cell 2 only', score[1] < 70 and min(score[0], score[2], score[3]) > 85,
+         'scores %s' % ', '.join('%.0f' % x for x in score))]
+
+
 LOAD_CYCLE = lambda t: not (400 <= t < 500)
 
 SCENARIOS = [
@@ -90,6 +107,8 @@ SCENARIOS = [
              dummy=0, heater=(250, 900), expect=exp_heater_only),
     Scenario('rig_vote', 'Rig demo: H2 into the dummy pocket, then heater: 2-of-3 vote', 700,
              dummy=0, local_gas=[(0, 300, 400, 0.1, 0.9)], heater=(330, 700), expect=exp_rig_vote),
+    Scenario('ir_health', 'Internal-resistance test per cell + health indicator (synthetic ageing of cell 2)', 420,
+             ir_tests=[120, 320], r0_change=[(1, 200, 1.8)], expect=exp_ir),
     Scenario('late_second', 'H2 pulse, then heat after the window expired: no vote', 1000,
              dummy=0, local_gas=[(0, 300, 330, 0.05, 0.8)], heater=(700, 1000), expect=exp_late),
 ]

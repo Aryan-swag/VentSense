@@ -118,6 +118,35 @@ def plot(sc, r, path):
     plt.close(fig)
 
 
+def plot_ir(sc, r, path):
+    """grouped bars: first (commissioning) vs latest internal-resistance test per cell, plus the health indicator"""
+    res = r['ir_results']
+    first, last = res[0][1], res[-1][1]
+    score = r['rec']['score'][-1]
+    fig, ax = plt.subplots(figsize=(8, 4.2))
+    fig.subplots_adjust(left=0.1, right=0.97, top=0.80, bottom=0.18)
+    fig.suptitle('Internal resistance per cell, measured by the firmware (DCIR at 1 s)', x=0.1, ha='left',
+                 fontsize=11, fontweight='bold', color=INK)
+    fig.text(0.1, 0.86, 'Digital twin, synthetic ageing of cell 2 between the tests. Health indicator under each cell '
+             '(advisory, 0-100).', fontsize=8.5, color=INK2)
+    w = 0.36
+    xs = range(P.N)
+    for i, (vals, lab, col) in enumerate(((first, 'First test (commissioning baseline)', CELL_COLORS[0]),
+                                          (last, 'Latest test', CELL_COLORS[1]))):
+        pos = [x + (i - 0.5) * (w + 0.02) for x in xs]
+        bars = ax.bar(pos, [v * 1000 for v in vals], width=w, color=col, label=lab, zorder=3)
+        for b, v in zip(bars, vals):
+            ax.text(b.get_x() + b.get_width() / 2, v * 1000 + 0.8, '%.1f' % (v * 1000), ha='center', fontsize=8, color=INK2)
+    ax.set_xticks(list(xs))
+    ax.set_xticklabels(['Cell %d\nhealth %.0f' % (k + 1, score[k]) for k in xs])
+    ax.set_ylabel('Internal resistance (mΩ)')
+    ax.set_ylim(0, max(last + first) * 1000 * 1.25)
+    ax.grid(axis='x', visible=False)
+    ax.legend(loc='upper left', frameon=False, fontsize=8, bbox_to_anchor=(0, 1.02), ncol=2)
+    fig.savefig(path, dpi=150)
+    plt.close(fig)
+
+
 def monte_carlo(n):
     rng = random.Random(42)
     normal = Scenario('mc_normal', '', 900, load=LOAD_CYCLE)
@@ -154,6 +183,8 @@ def main():
     for sc in SCENARIOS:
         r = Twin(sc, seed=1).run()
         plot(sc, r, os.path.join(OUT, sc.name + '.png'))
+        if r['ir_results']:
+            plot_ir(sc, r, os.path.join(OUT, sc.name + '_bars.png'))
         for name, ok, detail in sc.expect(r):
             total += 1
             passed += ok
