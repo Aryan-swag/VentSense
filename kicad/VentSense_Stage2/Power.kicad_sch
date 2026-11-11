@@ -7817,4 +7817,358 @@
 			)
 		)
 	)
+	(symbol
+		(lib_id "Device:R")
+		(at 142.24 182.88 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board no)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "8e2bc226-ff66-469a-b54d-858ef8972f8c")
+		(property "Reference" "R51"
+			(at 144.78 181.6099 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100k"
+			(at 144.78 184.1499 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal"
+			(at 140.462 182.88 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 142.24 182.88 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "100k gate-source pull-down soldered directly on the Q2 leads (off-board, decision 42). Keeps the MOSFET off if the J8 gate wire comes loose."
+			(at 142.24 182.88 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "c7264a31-225c-4a9b-9f2a-74fe03a49cb5")
+		)
+		(pin "2"
+			(uuid "38d23678-4801-4a70-9568-87e150d3ef7e")
+		)
+		(instances
+			(project "VentSense_Stage2"
+				(path "/e587cf2d-dcdc-467f-9bf7-11a8151c0250/4b23f6e2-e304-4684-9c04-cb8925721087"
+					(reference "R51")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 142.24 186.69 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "3dc86600-8ed6-47c0-bced-bc993cbf7e5c")
+		(property "Reference" "#PWR0251"
+			(at 142.24 193.04 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 142.24 191.77 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 142.24 186.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 142.24 186.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 142.24 186.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "6e5a49cf-8146-48ee-af67-6598fa06715a")
+		)
+		(instances
+			(project "VentSense_Stage2"
+				(path "/e587cf2d-dcdc-467f-9bf7-11a8151c0250/4b23f6e2-e304-4684-9c04-cb8925721087"
+					(reference "#PWR0251")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "GATE_HTR"
+		(shape passive)
+		(at 142.24 179.07 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "422b8ed8-d565-41e3-9101-ecbb0445d158")
+			)
+	(symbol
+		(lib_id "Device:R")
+		(at 170.18 182.88 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board no)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "79b2d8d7-2235-471d-83ea-d516c6187301")
+		(property "Reference" "R52"
+			(at 172.72 181.6099 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100k"
+			(at 172.72 184.1499 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal"
+			(at 168.402 182.88 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 170.18 182.88 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "100k gate-source pull-down soldered directly on the Q3 leads (off-board, decision 42). Keeps the MOSFET off if the J8 gate wire comes loose."
+			(at 170.18 182.88 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "10025b25-9c2c-49b1-8f93-1cd332a4d116")
+		)
+		(pin "2"
+			(uuid "2bdf2b14-3b3c-4ed9-9a80-cc9e90104e12")
+		)
+		(instances
+			(project "VentSense_Stage2"
+				(path "/e587cf2d-dcdc-467f-9bf7-11a8151c0250/4b23f6e2-e304-4684-9c04-cb8925721087"
+					(reference "R52")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 170.18 186.69 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "0545cdb7-91c9-46fd-b0d6-e4706a7349ec")
+		(property "Reference" "#PWR0252"
+			(at 170.18 193.04 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 170.18 191.77 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 170.18 186.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 170.18 186.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 170.18 186.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "1f97ba9b-d06d-467e-84d1-e9cde815837e")
+		)
+		(instances
+			(project "VentSense_Stage2"
+				(path "/e587cf2d-dcdc-467f-9bf7-11a8151c0250/4b23f6e2-e304-4684-9c04-cb8925721087"
+					(reference "#PWR0252")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "GATE_LOAD"
+		(shape passive)
+		(at 170.18 179.07 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "10d6da4b-cd9c-4b43-8d9a-5c0e32494f4f")
+			)
+	(text "R51/R52: 100k gate-source pull-downs, soldered on the Q2/Q3 leads (off-board)"
+		(exclude_from_sim no)
+		(at 170.18 194.31 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "55c52e6d-75f0-46fa-9a89-3e4b4cebb8d8")
+	)
 )

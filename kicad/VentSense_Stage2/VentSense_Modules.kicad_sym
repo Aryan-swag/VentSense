@@ -3198,7 +3198,7 @@
 				)
 			)
 		)
-		(property "Description" "1-channel 5 V opto-isolated relay module, SPDT, pack disconnect (Level 3). Wire COM to NO so energised = pack connected. Check the trigger-level jumper (H/L) if fitted. Pin order follows the common module; check it against the board we receive before wiring."
+		(property "Description" "1-channel 5 V opto-isolated relay module, SPDT, pack disconnect (Level 3). Wire COM to NO so energised = pack connected. Trigger jumper set to H: input active-HIGH (decision 41). Pin order follows the common module; check it against the board we receive before wiring."
 			(at 0 -12.7 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3398,7 +3398,7 @@
 				)
 			)
 		)
-		(property "Description" "4-channel 5 V opto-isolated relay module, Songle SRD-05VDC-SL-C SPDT (10 A, 28 VDC). Inputs active-LOW. Rev 2.1: JD-VCC jumper removed, VCC and JD-VCC both from +5V. Fail-secure wiring: COM to node k, NO to cell k +, NC to node k-1. Pin order follows the common module; check it against the board we receive before wiring."
+		(property "Description" "4-channel 5 V opto-isolated relay module, Songle SRD-05VDC-SL-C SPDT (10 A, 28 VDC). Trigger jumper set to H: inputs active-HIGH, IN = 3.3 V energises (decision 41). Rev 2.1: JD-VCC jumper removed, VCC and JD-VCC both from +5V. Fail-secure wiring: COM to node k, NO to cell k +, NC to node k-1. Pin order follows the common module; check it against the board we receive before wiring."
 			(at 0 -27.94 0)
 			(show_name no)
 			(do_not_autoplace no)

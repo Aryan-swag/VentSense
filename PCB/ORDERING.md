@@ -108,4 +108,6 @@ Design checks done in KiCad 10.0.6 with all default rules on: ERC 0 errors / 0 w
 - **PCF8574:** set the two modules to 0x20 and 0x21.
 - **Green LEDs:** must be low-Vf (2.2 V or less).
 - **microSD module:** with its CS high, MISO must float. If it doesn't, move JP2 to 2-3.
-- **Relay modules:** bench-test the trigger jumper setting with a 3.3 V signal before connecting cells. The board works with either setting.
+- **Relay modules:** set the trigger jumper to **H** (high-level trigger). Then bench-test before connecting cells: IN floating = off, IN = 3.3 V = on, IN = 0 V = off. Keep JP1 at 1-2 (+5 V).
+- **Off-board MOSFETs:** solder a 100 kΩ resistor (R51/R52) directly between gate and source of the heater and load IRLZ44Ns.
+- **Resistor kit:** needs at least 12 × 330 Ω, 8 × 15 k, 8 × 22 k, 6 × 100 k (plus 4 × 100 k 1%) and 4 × 20 k 1%.

@@ -11,7 +11,7 @@ Our claim is narrow: **2-of-3 voting across dissimilar signals plus per-cell iso
 
 | What | Status | Path |
 | :--- | :--- | :--- |
-| KiCad 10 project (6 hierarchical sheets, 134 symbols) | ERC: 0 errors, 0 warnings (default checks) | [`kicad/VentSense_Stage2/`](kicad/VentSense_Stage2/) |
+| KiCad 10 project (6 hierarchical sheets, 136 symbols) | ERC: 0 errors, 0 warnings (default checks) | [`kicad/VentSense_Stage2/`](kicad/VentSense_Stage2/) |
 | **Controller carrier PCB v1.1 (for fabrication)** | DRC: 0 violations, 0 unconnected, 0 parity issues (default checks, `--schematic-parity`) | [`PCB/`](PCB/) (ordering guide: [`PCB/ORDERING.md`](PCB/ORDERING.md)) |
 | Gerber + Excellon package v1.1 | 2 layers, 124 × 126 mm | [`PCB/fabrication/VentSense_Carrier_Gerbers_v1.1.zip`](PCB/fabrication/VentSense_Carrier_Gerbers_v1.1.zip) |
 | Stage 2 exports (schematic PDF/PNG, ERC/DRC, BOM CSV) | as submitted at Stage 2 (Oct 2026) | [`exports/`](exports/) |
